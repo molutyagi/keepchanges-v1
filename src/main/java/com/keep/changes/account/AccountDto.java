@@ -1,11 +1,5 @@
 package com.keep.changes.account;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import com.keep.changes.fundraiser.Fundraiser;
-import com.keep.changes.fundraiser.FundraiserDto;
-import com.keep.changes.user.User;
 import com.keep.changes.user.UserDto;
 
 import jakarta.validation.constraints.NotEmpty;

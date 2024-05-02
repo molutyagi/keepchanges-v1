@@ -28,7 +28,7 @@ public class PanDto {
 //	@NotEmpty
 //	private String panImage;
 
-	private UserDto panHolderDto;
+	private UserDto panHolder;
 
 	@NotEmpty
 	private String address;
@@ -45,6 +45,6 @@ public class PanDto {
 	@NotEmpty
 	private String pincode;
 
-	private Set<FundraiserDto> fundraiserDtos;
+	private Set<FundraiserDto> fundraisers;
 
 }

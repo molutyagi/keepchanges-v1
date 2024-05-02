@@ -2,6 +2,8 @@ package com.keep.changes.donation;
 
 import java.util.Date;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 import com.keep.changes.fundraiser.Fundraiser;
 import com.keep.changes.user.User;
 
@@ -24,15 +26,19 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Donation {
+public class FundraiserDonation {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
 	@Column(nullable = false, updatable = false)
-	private double donationAmount;
+	private Double donationAmount;
 
+	@Column(nullable = false, updatable = false, unique = true)
+	private String transactionId;
+
+	@CreationTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(nullable = false, updatable = false)
 	private Date donationDate;
@@ -44,5 +50,11 @@ public class Donation {
 	@ManyToOne
 	@JoinColumn(name = "fundraiser_id")
 	private Fundraiser fundraiser;
+
+	public void putUpdateDonation(Long id, Double donationAmount, String transactionId) {
+		this.id = id;
+		this.donationAmount = donationAmount;
+		this.transactionId = transactionId;
+	}
 
 }

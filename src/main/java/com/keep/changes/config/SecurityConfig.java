@@ -1,10 +1,10 @@
 package com.keep.changes.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -16,8 +16,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.keep.changes.exception.CustomAccessDeniedHandler;
@@ -32,6 +32,8 @@ import lombok.RequiredArgsConstructor;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+	private static final String[] ADMIN_ONLY_URLS = { "api/admin/**", "api/categories/**" };
+
 	private static final String[] PUBLIC_URLS = { "/v3/api-docs", "/v2/api-docs", "api/auth/**",
 			"/swagger-resources/**", "/swagger-ui/**", "/webjars/**" };
 
@@ -44,6 +46,10 @@ public class SecurityConfig {
 	@Autowired
 	private final CustomAccessDeniedHandler accessDeniedHandler;
 
+	@Autowired
+	@Qualifier("delegatedAuthenticationEntryPoint")
+	AuthenticationEntryPoint authEntryPoint;
+
 	@Bean
 	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -52,10 +58,10 @@ public class SecurityConfig {
 				.authenticationProvider(this.daoAuthenticationProviderBean())
 				.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 				.authorizeHttpRequests((req) -> req.requestMatchers(PUBLIC_URLS).permitAll()
-						.requestMatchers(HttpMethod.GET).permitAll().anyRequest().authenticated())
-				.userDetailsService(userDetailsServiceImpl)
-				.exceptionHandling(e -> e.accessDeniedHandler(this.accessDeniedHandler)
-						.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+						.requestMatchers(ADMIN_ONLY_URLS).hasRole("ADMIN").requestMatchers(HttpMethod.GET)
+						.permitAll().anyRequest().authenticated())
+				.userDetailsService(userDetailsServiceImpl).exceptionHandling(e -> e
+						.accessDeniedHandler(this.accessDeniedHandler).authenticationEntryPoint(this.authEntryPoint))
 				.httpBasic(Customizer.withDefaults()).build();
 	}
 
@@ -66,7 +72,6 @@ public class SecurityConfig {
 
 	@Bean
 	AuthenticationManager authenticationManagerBean(AuthenticationConfiguration authConfig) throws Exception {
-
 		return authConfig.getAuthenticationManager();
 	}
 

@@ -8,9 +8,9 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.keep.changes.account.AccountDto;
 import com.keep.changes.address.AddressDto;
 import com.keep.changes.category.CategoryDto;
-import com.keep.changes.donation.DonationDto;
+import com.keep.changes.donation.FundraiserDonationDto;
+import com.keep.changes.fundraiser.photo.PhotoDto;
 import com.keep.changes.pan.PanDto;
-import com.keep.changes.photo.PhotoDto;
 import com.keep.changes.user.UserDto;
 
 import io.micrometer.common.lang.NonNull;
@@ -72,6 +72,9 @@ public class FundraiserDto {
 	private AdminApproval approval;
 
 	@JsonProperty(access = Access.READ_ONLY)
+	private String adminRemarks;
+
+	@JsonProperty(access = Access.READ_ONLY)
 	private FundraiserStatus status;
 
 	@NonNull
@@ -88,7 +91,7 @@ public class FundraiserDto {
 
 	private AccountDto account;
 
-	private Set<DonationDto> donations;
+//	private Set<FundraiserDonationDto> donations;
 
 	@Override
 	public String toString() {
@@ -98,7 +101,7 @@ public class FundraiserDto {
 				+ ", lastModifiedDate=" + lastModifiedDate + ", displayPhoto=" + displayPhoto + ", coverPhoto="
 				+ coverPhoto + ", isActive=" + isActive + ", approval=" + approval + ", status=" + status
 				+ ", category=" + category + ", postedBy=" + postedBy + ", photos=" + photos + ", address=" + address
-				+ ", pan=" + pan + ", accounts=" + account + ", donationDtos=" + donations + "]";
+				+ ", pan=" + pan + ", account=" + account;
 	}
 
 }

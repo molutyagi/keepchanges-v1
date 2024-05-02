@@ -7,8 +7,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.keep.changes.account.AccountDto;
-import com.keep.changes.address.AddressDto;
-import com.keep.changes.donation.DonationDto;
+import com.keep.changes.donation.FundraiserDonationDto;
 import com.keep.changes.fundraiser.FundraiserDto;
 import com.keep.changes.pan.PanDto;
 import com.keep.changes.role.RoleDto;
@@ -61,19 +60,19 @@ public class UserDto {
 	@JsonProperty(access = Access.READ_ONLY)
 	private Set<RoleDto> roles = new HashSet<>();
 
-	@JsonProperty(access = Access.READ_ONLY)
-	private AddressDto address;
-
-	@JsonProperty(access = Access.READ_ONLY)
-	private PanDto pan;
-
-	@JsonProperty(access = Access.READ_ONLY)
-	private Set<AccountDto> accounts = new HashSet<>();
-
 //	@JsonProperty(access = Access.READ_ONLY)
-	private Set<FundraiserDto> fundraisers = new HashSet<>();
-
-	@JsonProperty(access = Access.READ_ONLY)
-	private Set<DonationDto> donations = new HashSet<>();
+//	private AddressDto address;
+//
+//	@JsonProperty(access = Access.READ_ONLY)
+	private PanDto pan;
+//
+//	@JsonProperty(access = Access.READ_ONLY)
+//	private Set<AccountDto> accounts = new HashSet<>();
+//
+//	@JsonProperty(access = Access.READ_ONLY)
+//	private Set<FundraiserDto> fundraisers = new HashSet<>();
+//
+//	@JsonProperty(access = Access.READ_ONLY)
+//	private Set<FundraiserDonationDto> donations = new HashSet<>();
 
 }

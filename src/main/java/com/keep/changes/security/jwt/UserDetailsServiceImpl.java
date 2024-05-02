@@ -19,7 +19,8 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String username) {
-
+		System.out.println(username + " : username");
+		
 		return this.userRepository.findByEmail(username)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Username", username));
 	}

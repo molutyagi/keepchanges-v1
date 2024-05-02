@@ -1,4 +1,4 @@
-package com.keep.changes.photo;
+package com.keep.changes.fundraiser.photo;
 
 import com.keep.changes.fundraiser.Fundraiser;
 
@@ -22,7 +22,7 @@ public class Photo {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private long id;
+	private Long id;
 
 	@Column(columnDefinition = "varchar(100)", nullable = false)
 	private String photoUrl;

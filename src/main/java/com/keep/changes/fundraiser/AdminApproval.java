@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum AdminApproval {
-	APPROVED("Approved"), PENDING("Pending"), DISAPPROVED("Cancelled");
+	APPROVED("Approved"), PENDING("Pending"), DISAPPROVED("Disapproved");
 
 	private final String approval;
 }

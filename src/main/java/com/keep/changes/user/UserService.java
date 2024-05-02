@@ -1,6 +1,9 @@
 package com.keep.changes.user;
 
 import java.util.List;
+import java.util.Set;
+
+import com.keep.changes.auth.AuthenticationResponse;
 
 public interface UserService {
 
@@ -12,6 +15,9 @@ public interface UserService {
 
 //	Patch Update User
 	UserDto patchUpdateUser(Long uId, UserDto userDto);
+
+//	Update user email
+	AuthenticationResponse updateUserEmail(Long uId, UserDto userDto);
 
 //	Delete User
 	void deleteUser(Long uId);
@@ -29,8 +35,12 @@ public interface UserService {
 
 	UserDto getUserByEmail(String email);
 
+	List<UserDto> getUsersByEmailContaining(String email);
+
 	UserDto getUserByPhone(String phone);
 
 	List<UserDto> getUsersByName(String name);
+
+	Set<UserDto> searchUsers(String keyWord);
 
 }

@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
 @Service
+@Transactional
 public class FundraiserServiceImpl implements FundraiserService {
 
 	@Autowired
@@ -58,12 +60,24 @@ public class FundraiserServiceImpl implements FundraiserService {
 	@Transactional
 	public FundraiserDto createFundraiser(FundraiserDto fundraiserDto) {
 
-		String loggedInUser = SecurityContextHolder.getContext().getAuthentication().getName();
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		String loggedInUser = authentication.getName();
+
 		User user = this.userRepository.findByEmail(loggedInUser)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Username", loggedInUser));
 
 		Fundraiser fundraiser = this.modelMapper.map(fundraiserDto, Fundraiser.class);
 		fundraiser.setPostedBy(user);
+
+		if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
+			fundraiser.setActive(true);
+			fundraiser.setStatus(FundraiserStatus.ACTIVE);
+			fundraiser.setApproval(AdminApproval.APPROVED);
+			fundraiser.setAdminRemarks("This fundraiser is created by admin himself.");
+		} else {
+			fundraiser.setStatus(FundraiserStatus.INACTIVE);
+			fundraiser.setApproval(AdminApproval.PENDING);
+		}
 
 		Fundraiser saved = this.fundraiserRepository.save(fundraiser);
 
@@ -320,5 +334,19 @@ public class FundraiserServiceImpl implements FundraiserService {
 			}
 		}
 		return isDeleted;
+	}
+
+	@Override
+	public void fundraiserAdminService(@Valid Long fId, String adminRemarks, AdminApproval adminStatus) {
+
+		Fundraiser fundraiser = this.fundraiserRepository.findById(fId)
+				.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id", fId));
+
+		fundraiser.setAdminRemarks(adminRemarks);
+		fundraiser.setApproval(adminStatus);
+		fundraiser.setActive(true);
+
+		this.fundraiserRepository.save(fundraiser);
+
 	}
 }

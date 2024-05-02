@@ -1,6 +1,4 @@
-package com.keep.changes.photo;
-
-import com.keep.changes.fundraiser.FundraiserDto;
+package com.keep.changes.fundraiser.document;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,12 +9,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class PhotoDto {
-
+public class FundraiserDocumentDto {
+	
 	private long id;
-
-	private String photoUrl;
-
-	private FundraiserDto fundraiserDto;
-
+	private String documentUrl;
 }

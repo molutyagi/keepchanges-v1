@@ -3,7 +3,10 @@ package com.keep.changes.user;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,12 +15,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.keep.changes.auth.AuthenticationResponse;
 import com.keep.changes.config.AppConstants;
 import com.keep.changes.exception.ApiException;
 import com.keep.changes.exception.ResourceNotFoundException;
 import com.keep.changes.file.FileService;
 import com.keep.changes.role.Role;
 import com.keep.changes.role.RoleRepository;
+import com.keep.changes.security.jwt.JwtService;
 
 import jakarta.transaction.Transactional;
 
@@ -32,6 +37,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private FileService fileService;
+
+	@Autowired
+	private JwtService jwtService;
 
 	@Autowired
 	private ModelMapper modelMapper;
@@ -91,11 +99,8 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public UserDto patchUpdateUser(Long uId, UserDto partialUserDto) {
 
-		System.out.println("1");
 		User user = this.userRepository.findById(uId)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Id", uId));
-		System.out.println("2");
-//		System.out.println("ROLES : " + partialUserDto.getRoles().isEmpty());
 
 		User partialUser = this.modelMapper.map(partialUserDto, User.class);
 
@@ -106,6 +111,11 @@ public class UserServiceImpl implements UserService {
 				Object value = field.get(partialUser);
 
 				if (value != null) {
+
+					if (field.getName().equals("roles") || field.getName().equals("accounts")
+							|| field.getName().equals("fundraisers") || field.getName().equals("donations")) {
+						break;
+					}
 
 					System.out.println(field + " : field , value : " + value);
 					if (field.getName().equals("password")) {
@@ -131,6 +141,23 @@ public class UserServiceImpl implements UserService {
 		System.out.println("3");
 		this.userRepository.save(user);
 		return this.modelMapper.map(user, UserDto.class);
+	}
+
+//	Update user email
+	public AuthenticationResponse updateUserEmail(Long uId, UserDto userDto) {
+		User user = this.userRepository.findById(uId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Id", uId));
+
+		user.setEmail(userDto.getEmail());
+		this.userRepository.save(user);
+		String accessToken = this.jwtService.generateAccessToken(user);
+		String refreshToken = this.jwtService.generateRefreshToken(user);
+
+		AuthenticationResponse response = new AuthenticationResponse();
+		response.setAccessToken(accessToken);
+		response.setRefreshToken(refreshToken);
+
+		return response;
 	}
 
 //	Delete User
@@ -219,6 +246,21 @@ public class UserServiceImpl implements UserService {
 		return this.modelMapper.map(user, UserDto.class);
 	}
 
+//	Get User by Email containing 
+	@Override
+	@Transactional
+	public List<UserDto> getUsersByEmailContaining(String email) {
+		List<User> users = this.userRepository.findByEmailContaining(email)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Email", email));
+
+		List<UserDto> userDtos = new ArrayList<>();
+		for (User user : users) {
+			UserDto userDto = this.modelMapper.map(user, UserDto.class);
+			userDtos.add(userDto);
+		}
+		return userDtos;
+	}
+
 //	Get User By Phone
 	@Override
 	@Transactional
@@ -245,6 +287,43 @@ public class UserServiceImpl implements UserService {
 		return userDtos;
 	}
 
+//	search users
+	@Override
+	public Set<UserDto> searchUsers(String keyWord) {
+
+		Set<UserDto> userDtos = new HashSet<UserDto>();
+
+		Optional<User> byEmail = this.userRepository.findByEmail(keyWord);
+		Optional<User> byPhone = this.userRepository.findByPhone(keyWord);
+		List<User> byNameContaining = this.userRepository.findByNameContaining(keyWord).orElse(null);
+		List<User> byEmailContaining = this.userRepository.findByEmailContaining(keyWord).orElse(null);
+
+		if (byEmail.isPresent()) {
+			userDtos.add(this.modelMapper.map(byEmail, UserDto.class));
+		}
+
+		if (byPhone.isPresent()) {
+			userDtos.add(this.modelMapper.map(byPhone, UserDto.class));
+		}
+
+		if (!byNameContaining.isEmpty()) {
+			for (User user : byNameContaining) {
+				userDtos.add(this.modelMapper.map(user, UserDto.class));
+			}
+		}
+
+		if (!byEmailContaining.isEmpty()) {
+			for (User user : byEmailContaining) {
+				userDtos.add(this.modelMapper.map(user, UserDto.class));
+			}
+		}
+
+//		if (userDtos.isEmpty()) {
+//			throw new ResourceNotFoundException("User", "Keyword", keyWord);
+//		}
+		return userDtos;
+	}
+
 //	delete if previous profile exists
 	private boolean hasPreviousProfile(User user) {
 
@@ -257,12 +336,12 @@ public class UserServiceImpl implements UserService {
 				this.fileService.deleteFile(profileImagePath, user.getDisplayImage());
 				isDeleted = true;
 			} catch (IOException e) {
-				throw new ApiException("1 OOPS!! Something went wrong. Could not update profile image.",
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
 						HttpStatus.BAD_REQUEST, false);
 			}
 
 			if (isDeleted == false) {
-				throw new ApiException("2 OOPS!! Something went wrong. Could not update profile image.",
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
 						HttpStatus.BAD_REQUEST, false);
 			}
 		}
@@ -281,12 +360,12 @@ public class UserServiceImpl implements UserService {
 				this.fileService.deleteFile(coverImagePath, user.getCoverImage());
 				isDeleted = true;
 			} catch (IOException e) {
-				throw new ApiException("1 OOPS!! Something went wrong. Could not update cover image.",
+				throw new ApiException("OOPS!! Something went wrong. Could not update cover image.",
 						HttpStatus.BAD_REQUEST, false);
 			}
 
 			if (isDeleted == false) {
-				throw new ApiException("2 OOPS!! Something went wrong. Could not update cover image.",
+				throw new ApiException("OOPS!! Something went wrong. Could not update cover image.",
 						HttpStatus.BAD_REQUEST, false);
 			}
 		}

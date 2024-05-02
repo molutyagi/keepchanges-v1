@@ -15,7 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.keep.changes.account.Account;
 import com.keep.changes.address.Address;
-import com.keep.changes.donation.Donation;
+import com.keep.changes.donation.FundraiserDonation;
 import com.keep.changes.fundraiser.Fundraiser;
 import com.keep.changes.pan.Pan;
 import com.keep.changes.role.Role;
@@ -102,7 +102,7 @@ public class User implements UserDetails {
 	private Set<Fundraiser> fundraisers = new HashSet<>();
 
 	@OneToMany(mappedBy = "donor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Set<Donation> donations = new HashSet<>();
+	private Set<FundraiserDonation> donations = new HashSet<>();
 
 	public void setUpdateUser(long id, String name, String email, String password, String phone, String displayImage,
 			String coverImage, String about) {

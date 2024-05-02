@@ -10,7 +10,7 @@ public class ResourceNotFoundException extends RuntimeException {
 	private String resourceName;
 	private String fieldName;
 	private long fieldValue;
-	private String stringFieledValue;
+	private String stringFieldValue;
 
 	public ResourceNotFoundException(String resourceName, String fieldName, long fieldValue) {
 
@@ -27,7 +27,7 @@ public class ResourceNotFoundException extends RuntimeException {
 
 		this.resourceName = resourceName;
 		this.fieldName = fieldName;
-		this.stringFieledValue = stringFieldValue;
+		this.stringFieldValue = stringFieldValue;
 	}
 
 }

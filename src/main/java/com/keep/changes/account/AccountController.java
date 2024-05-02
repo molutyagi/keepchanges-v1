@@ -1,7 +1,9 @@
 package com.keep.changes.account;
 
 import java.nio.file.AccessDeniedException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -15,9 +17,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.keep.changes.exception.ApiException;
+import com.keep.changes.fundraiser.FundraiserDto;
+import com.keep.changes.fundraiser.FundraiserService;
 import com.keep.changes.payload.response.ApiResponse;
 import com.keep.changes.user.UserDto;
 
@@ -32,11 +39,38 @@ public class AccountController {
 	@Autowired
 	private AccountService accountService;
 
+	@Autowired
+	private FundraiserService fundraiserService;
+
+	@Autowired
+	private ObjectMapper objectMapper;
+
 //	Add account
 	@PostMapping(value = { "add", "add/" })
 	public ResponseEntity<AccountDto> addAccount(@Valid @RequestBody AccountDto accountDto) {
 
 		return new ResponseEntity<AccountDto>(this.accountService.addAccount(accountDto), HttpStatus.CREATED);
+	}
+
+//	Add Account from fundraiser
+	@PostMapping(value = { "fundraiser/account", "fundraiser/account/" })
+	public ResponseEntity<?> addFundraiserAccount(@Valid @RequestParam(value = "fId", required = false) Long fId,
+			@RequestParam(value = "accountData", required = true) String accountData) {
+
+		AccountDto accountDto;
+
+		try {
+			accountDto = this.objectMapper.readValue(accountData, AccountDto.class);
+		} catch (JsonProcessingException e) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Request!");
+		}
+
+		FundraiserDto fundraiserDto = this.fundraiserService.getFundraiserById(fId);
+		Set<FundraiserDto> fundraiserDtos = new HashSet<>();
+		fundraiserDtos.add(fundraiserDto);
+//		accountDto.setAssociatedFundraiser(fundraiserDtos);
+
+		return new ResponseEntity<>(this.accountService.addAccount(accountDto), HttpStatus.CREATED);
 	}
 
 //	update
@@ -90,17 +124,19 @@ public class AccountController {
 		return ResponseEntity.ok(this.accountService.getAccountByHoldingEntity(uId));
 	}
 
+//	by account number
+	@GetMapping(value = { "account/number_{aNumber}", "account/number_{aNumber}/" })
+	public ResponseEntity<AccountDto> getAccountByAccountNumber(@PathVariable String aNumber) {
+
+		return ResponseEntity.ok(this.accountService.getAccountByAccountNumber(aNumber));
+	}
+
 	public boolean authenticateUser(long aId, long cUId, boolean bool) throws AccessDeniedException {
-
 		UserDto holdingEntity = this.accountService.getAccountById(aId).getHoldingEntity();
-
 		if (holdingEntity.getId() == cUId || bool) {
-
 			return true;
 		}
-
 		throw new ApiException("You are not authorized to perform this action.", HttpStatus.FORBIDDEN, false);
-
 	}
 
 }

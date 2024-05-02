@@ -41,4 +41,6 @@ public interface FundraiserService {
 
 	List<FundraiserDto> getFundraisersByCause(String cause);
 
+	void fundraiserAdminService(@Valid Long fId, String adminRemarks, AdminApproval adminStatus);
+
 }

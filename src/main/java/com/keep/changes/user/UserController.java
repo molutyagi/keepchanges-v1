@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.keep.changes.auth.AuthenticationResponse;
 import com.keep.changes.exception.ApiException;
 import com.keep.changes.exception.ResourceNotFoundException;
 import com.keep.changes.file.FileService;
@@ -87,6 +89,16 @@ public class UserController {
 		return ResponseEntity.ok(patchedUser);
 	}
 
+//	update User Email
+	@PatchMapping("user_{uId}/update-email")
+	@PreAuthorize("@userController.authenticatedUser(#uId, authentication.principal.id, hasRole('ADMIN'))")
+	public ResponseEntity<AuthenticationResponse> updateUserEmail(@Valid @PathVariable Long uId,
+			@RequestBody UserDto userDto) {
+
+		AuthenticationResponse responseTokens = this.userService.updateUserEmail(uId, userDto);
+		return ResponseEntity.ok(responseTokens);
+	}
+
 //	Delete User
 	@DeleteMapping("user/delete_{uId}")
 	public ResponseEntity<?> deleteUser(@PathVariable Long uId) {
@@ -119,6 +131,13 @@ public class UserController {
 		return ResponseEntity.ok(this.userService.getUserByEmail(email));
 	}
 
+//	Get by Email Containing
+	@GetMapping(value = { "email/{email}", "user/{email}/" })
+	public ResponseEntity<List<UserDto>> getUsersByEmailContaining(@PathVariable String email) {
+
+		return ResponseEntity.ok(this.userService.getUsersByEmailContaining(email));
+	}
+
 //	Get By Phone
 	@GetMapping(value = { "user/phone/{phone}", "user/phone/{phone}/" })
 	public ResponseEntity<UserDto> getUserByPhone(@PathVariable String phone) {
@@ -133,11 +152,26 @@ public class UserController {
 		return ResponseEntity.ok(this.userService.getUsersByName(name));
 	}
 
+//	get user(s)
+	@GetMapping(value = { "search/{keyWord}", "user/search/{keyWord}/" })
+	public ResponseEntity<Set<UserDto>> searchUsers(@PathVariable String keyWord) {
+
+		return ResponseEntity.ok(this.userService.searchUsers(keyWord));
+	}
+
 //	Upload User Profile Image
 	@PatchMapping(value = { "user_{uId}/profile-image", "user_{uId}/profile-image/" })
 	@PreAuthorize("@userController.authenticatedUser(#uId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<?> uploadProfileImage(@Valid @PathVariable Long uId,
 			@RequestParam("image") MultipartFile image) throws IOException {
+
+		if (image.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+		}
+
+		if (!image.getContentType().startsWith("image")) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+		}
 
 		UserDto userDto = new UserDto();
 		UserDto updatedUser;
@@ -199,6 +233,14 @@ public class UserController {
 	@PreAuthorize("@userController.authenticatedUser(#uId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<?> uploadCoverImage(@Valid @PathVariable Long uId,
 			@RequestParam("image") MultipartFile image) {
+
+		if (image.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+		}
+
+		if (!image.getContentType().startsWith("image")) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+		}
 
 		UserDto userDto = new UserDto();
 		UserDto updatedUser;
@@ -284,21 +326,30 @@ public class UserController {
 		}
 
 		if (profileImage != null) {
+
+			if (!profileImage.getContentType().startsWith("image")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+			}
+
 			try {
 				profileImageName = this.fileService.uploadImage(profileImagePath, profileImage);
 			} catch (IOException e) {
-				throw new ApiException("1 OOPS!! Something went wrong. Could not update profile.",
-						HttpStatus.BAD_REQUEST, false);
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile.",
+						HttpStatus.INTERNAL_SERVER_ERROR, false);
 			}
 			userDto.setDisplayImage(profileImageName);
 		}
 
 		if (coverImage != null) {
+			if (!coverImage.getContentType().startsWith("image")) {
+				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+			}
+
 			try {
 				coverImageName = this.fileService.uploadImage(coverImagePath, coverImage);
 			} catch (IOException e) {
-				throw new ApiException("2 OOPS!! Something went wrong. Could not update profile.",
-						HttpStatus.BAD_REQUEST, false);
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile.",
+						HttpStatus.INTERNAL_SERVER_ERROR, false);
 			}
 			userDto.setCoverImage(coverImageName);
 		}
@@ -309,14 +360,14 @@ public class UserController {
 			try {
 				this.fileService.deleteFile(profileImagePath, profileImageName);
 			} catch (IOException e1) {
-				throw new ApiException("3 OOPS!! Something went wrong. Could not update profile.",
-						HttpStatus.BAD_REQUEST, false);
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile.",
+						HttpStatus.INTERNAL_SERVER_ERROR, false);
 			}
 			try {
 				this.fileService.deleteFile(coverImagePath, coverImageName);
 			} catch (IOException e1) {
-				throw new ApiException("4 OOPS!! Something went wrong. Could not update profile.",
-						HttpStatus.BAD_REQUEST, false);
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile.",
+						HttpStatus.INTERNAL_SERVER_ERROR, false);
 			}
 			throw new ResourceNotFoundException("User", "Id", uId);
 		}

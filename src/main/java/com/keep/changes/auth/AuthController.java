@@ -28,15 +28,15 @@ public class AuthController {
 	public ResponseEntity<AuthenticationResponse> login(
 			@Valid @RequestBody AuthenticationRequest authenticationRequest) {
 
-		AuthenticationResponse token = null;
+		AuthenticationResponse responseTokens = null;
 		try {
-			token = this.authenticationService.login(authenticationRequest);
+			responseTokens = this.authenticationService.login(authenticationRequest);
 		} catch (AuthenticationException e) {
 			System.out.println("Exception : " + e);
 			e.printStackTrace();
 		}
 
-		return ResponseEntity.ok(token);
+		return ResponseEntity.ok(responseTokens);
 	}
 
 	@PostMapping("register")

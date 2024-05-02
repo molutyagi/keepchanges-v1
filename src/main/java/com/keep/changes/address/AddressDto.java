@@ -35,8 +35,8 @@ public class AddressDto {
 	@NotEmpty
 	private String pincode;
 
-	private Set<UserDto> associatedUser = new HashSet<>();
+//	private Set<UserDto> associatedUser = new HashSet<>();
 
-	private Set<FundraiserDto> associatedFundraiser = new HashSet<>();
+//	private Set<FundraiserDto> associatedFundraiser = new HashSet<>();
 
 }

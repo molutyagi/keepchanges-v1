@@ -27,4 +27,6 @@ public interface AccountService {
 //	get by Holder
 	List<AccountDto> getAccountByHoldingEntity(Long uId);
 
+	AccountDto getAccountByAccountNumber(String accountNumber);
+
 }

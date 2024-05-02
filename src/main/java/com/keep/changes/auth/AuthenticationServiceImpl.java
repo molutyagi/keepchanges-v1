@@ -1,6 +1,8 @@
 package com.keep.changes.auth;
 
 import java.io.IOException;
+import java.security.SecureRandom;
+import java.util.Optional;
 
 import javax.naming.AuthenticationException;
 
@@ -11,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,7 @@ import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.keep.changes.config.AppConstants;
 import com.keep.changes.exception.ApiException;
+import com.keep.changes.exception.ResourceAlreadyExistsException;
 import com.keep.changes.exception.ResourceNotFoundException;
 import com.keep.changes.role.Role;
 import com.keep.changes.role.RoleRepository;
@@ -60,6 +62,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	@Override
 	public AuthenticationResponse register(UserDto userDto) {
 
+		Optional<User> userWithEmail = this.userRepository.findByEmail(userDto.getEmail());
+		if (userWithEmail.isPresent()) {
+			throw new ResourceAlreadyExistsException("User", "Email", userDto.getEmail());
+		}
+
+		Optional<User> userWithPhone = this.userRepository.findByPhone(userDto.getPhone());
+		if (userWithPhone.isPresent()) {
+			throw new ResourceAlreadyExistsException("User", "Phone", userDto.getPhone());
+		}
+
 		User newUser = this.modelMapper.map(userDto, User.class);
 		newUser.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
 
@@ -68,6 +80,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 		System.out.println("role : " + role);
 		newUser.getRoles().add(role);
+
+//		sendValidationEmail(newUser);
 
 		User savedUser = this.userRepository.save(newUser);
 
@@ -136,6 +150,35 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			}
 		}
 
+	}
+
+//	verify the email using otp
+	private void sendValidationEmail(User newUser) {
+
+		var token = generateAndSaveActivationToken(newUser);
+//		send email
+
+	}
+
+	private String generateAndSaveActivationToken(User newUser) {
+
+		String generatedCode = generateActivationCode(6);
+
+		return "";
+	}
+
+	private String generateActivationCode(int length) {
+
+		String characters = "0123456789";
+		StringBuilder codeBuilder = new StringBuilder();
+		SecureRandom secureRandom = new SecureRandom();
+
+		for (int i = 0; i < length; i++) {
+			int randomIndex = secureRandom.nextInt(characters.length());
+			codeBuilder.append(characters.charAt(randomIndex));
+		}
+
+		return codeBuilder.toString();
 	}
 
 }

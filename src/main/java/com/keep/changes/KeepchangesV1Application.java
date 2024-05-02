@@ -23,8 +23,8 @@ public class KeepchangesV1Application implements CommandLineRunner {
 		SpringApplication.run(KeepchangesV1Application.class, args);
 	}
 
-	@Bean
-	public ModelMapper modelMapper() {
+    @Bean
+    ModelMapper modelMapper() {
 
 		return new ModelMapper();
 	}

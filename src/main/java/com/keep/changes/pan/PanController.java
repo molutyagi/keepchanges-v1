@@ -37,21 +37,18 @@ public class PanController {
 //	Put Update
 	@PutMapping(value = { "pan/{pId}", "pan/{pId}/" })
 	public ResponseEntity<PanDto> putUpdatePan(@Valid @PathVariable Long pId, @RequestBody PanDto panDto) {
-
 		return ResponseEntity.ok(this.panService.putUpdatePan(panDto, pId));
 	}
 
 //	Patch Update
 	@PatchMapping(value = { "pan/{pId}", "pan/{pId}/" })
 	public ResponseEntity<PanDto> patchUpdatePan(@Valid @PathVariable Long pId, @RequestBody PanDto panDto) {
-
 		return ResponseEntity.ok(this.panService.patchUpdatePan(panDto, pId));
 	}
 
 //	Delete
 	@DeleteMapping(value = { "pan/{pId}", "pan/{pId}/" })
 	public ResponseEntity<ApiResponse> deletePan(@Valid @PathVariable Long pId) {
-
 		this.panService.deletePan(pId);
 		return ResponseEntity.ok(new ApiResponse("Pan deleted successfully", true));
 	}
