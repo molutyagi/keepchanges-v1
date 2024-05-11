@@ -3,12 +3,13 @@ package com.keep.changes.fundraiser;
 import java.util.Date;
 import java.util.Set;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.keep.changes.account.AccountDto;
 import com.keep.changes.address.AddressDto;
 import com.keep.changes.category.CategoryDto;
-import com.keep.changes.donation.FundraiserDonationDto;
 import com.keep.changes.fundraiser.photo.PhotoDto;
 import com.keep.changes.pan.PanDto;
 import com.keep.changes.user.UserDto;
@@ -55,6 +56,8 @@ public class FundraiserDto {
 
 	@JsonProperty(access = Access.READ_ONLY)
 	private Date startDate;
+	
+	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private Date endDate;
 
 	@JsonProperty(access = Access.READ_ONLY)

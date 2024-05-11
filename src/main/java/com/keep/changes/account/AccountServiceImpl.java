@@ -67,9 +67,9 @@ public class AccountServiceImpl implements AccountService {
 		account.putUpdateAccount(aId, ad.getAccountNumber(), ad.getIfsc(), ad.getBankName(), ad.getBranch(),
 				ad.getHolderName());
 
-		Account saved = this.accountRepository.save(account);
+		Account updated = this.accountRepository.save(account);
 
-		return this.modelMapper.map(saved, AccountDto.class);
+		return this.modelMapper.map(updated, AccountDto.class);
 
 	}
 
@@ -100,8 +100,8 @@ public class AccountServiceImpl implements AccountService {
 			}
 		}
 
-		this.accountRepository.save(account);
-		return this.modelMapper.map(account, AccountDto.class);
+		Account updated = this.accountRepository.save(account);
+		return this.modelMapper.map(updated, AccountDto.class);
 	}
 
 //	delete

@@ -29,6 +29,8 @@ public interface UserService {
 	boolean deleteCoverImage(long uId);
 
 //	Get Users
+	UserDto getCurrentUser();
+
 	UserDto getUserById(Long uId);
 
 	List<UserDto> getAllUsers();
@@ -42,5 +44,9 @@ public interface UserService {
 	List<UserDto> getUsersByName(String name);
 
 	Set<UserDto> searchUsers(String keyWord);
+
+	boolean emailExists(String email);
+
+	boolean phoneExists(String phone);
 
 }

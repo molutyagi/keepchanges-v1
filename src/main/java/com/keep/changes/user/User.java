@@ -80,10 +80,13 @@ public class User implements UserDetails {
 
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
+	@Column(insertable = false)
 	private Date lastUpdateTime;
 
+	private Boolean isEnabled;
+
 	@ManyToMany(cascade = CascadeType.REMOVE, fetch = FetchType.EAGER)
-	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "id"))
+//	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "id"))
 	private Set<Role> roles = new HashSet<>();
 
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)

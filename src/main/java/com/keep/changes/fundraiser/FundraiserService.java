@@ -21,9 +21,6 @@ public interface FundraiserService {
 //	delete display
 	boolean deleteDisplay(@Valid Long fId);
 
-//	delete cover
-	boolean deleteCover(@Valid Long fId);
-
 //	Get Fundraiser
 	FundraiserDto getFundraiserById(Long fId);
 

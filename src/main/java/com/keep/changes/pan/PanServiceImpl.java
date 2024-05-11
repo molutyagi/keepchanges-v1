@@ -79,8 +79,8 @@ public class PanServiceImpl implements PanService {
 			}
 		}
 
-		this.panRepository.save(pan);
-		return this.modelMapper.map(pan, PanDto.class);
+		Pan updatedPan = this.panRepository.save(pan);
+		return this.modelMapper.map(updatedPan, PanDto.class);
 	}
 
 	@Override

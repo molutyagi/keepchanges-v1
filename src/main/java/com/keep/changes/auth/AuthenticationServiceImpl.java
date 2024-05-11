@@ -1,7 +1,6 @@
 package com.keep.changes.auth;
 
 import java.io.IOException;
-import java.security.SecureRandom;
 import java.util.Optional;
 
 import javax.naming.AuthenticationException;
@@ -74,18 +73,17 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 		User newUser = this.modelMapper.map(userDto, User.class);
 		newUser.setPassword(this.passwordEncoder.encode(userDto.getPassword()));
+		newUser.setEmail(newUser.getEmail().toLowerCase());
 
 		Role role = this.roleRepository.findById(AppConstants.NORMAL_USER)
 				.orElseThrow(() -> new ResourceNotFoundException("Role", "Id", AppConstants.NORMAL_USER));
 
-		System.out.println("role : " + role);
 		newUser.getRoles().add(role);
+		newUser.setIsEnabled(true);
 
 //		sendValidationEmail(newUser);
 
 		User savedUser = this.userRepository.save(newUser);
-
-		System.out.println(savedUser);
 
 		String accessToken = this.jwtService.generateAccessToken(savedUser);
 		String refreshToken = this.jwtService.generateRefreshToken(savedUser);
@@ -151,34 +149,4 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		}
 
 	}
-
-//	verify the email using otp
-	private void sendValidationEmail(User newUser) {
-
-		var token = generateAndSaveActivationToken(newUser);
-//		send email
-
-	}
-
-	private String generateAndSaveActivationToken(User newUser) {
-
-		String generatedCode = generateActivationCode(6);
-
-		return "";
-	}
-
-	private String generateActivationCode(int length) {
-
-		String characters = "0123456789";
-		StringBuilder codeBuilder = new StringBuilder();
-		SecureRandom secureRandom = new SecureRandom();
-
-		for (int i = 0; i < length; i++) {
-			int randomIndex = secureRandom.nextInt(characters.length());
-			codeBuilder.append(characters.charAt(randomIndex));
-		}
-
-		return codeBuilder.toString();
-	}
-
 }

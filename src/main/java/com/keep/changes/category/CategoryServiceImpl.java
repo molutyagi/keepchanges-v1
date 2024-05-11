@@ -57,9 +57,9 @@ public class CategoryServiceImpl implements CategoryService {
 
 		category.putUpdateCategory(cId, cd.getCategoryName(), cd.getCategoryDescription(), cd.getCategorySvg());
 
-		Category saved = this.categoryRepository.save(category);
+		Category updated = this.categoryRepository.save(category);
 
-		return this.modelMapper.map(saved, CategoryDto.class);
+		return this.modelMapper.map(updated, CategoryDto.class);
 	}
 
 //	patch
@@ -93,9 +93,9 @@ public class CategoryServiceImpl implements CategoryService {
 			}
 		}
 
-		this.categoryRepository.save(category);
+		Category updated = this.categoryRepository.save(category);
 
-		return this.modelMapper.map(category, CategoryDto.class);
+		return this.modelMapper.map(updated, CategoryDto.class);
 	}
 
 //	delete

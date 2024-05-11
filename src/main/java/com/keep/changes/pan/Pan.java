@@ -1,8 +1,5 @@
 package com.keep.changes.pan;
 
-import java.util.Set;
-
-import com.keep.changes.fundraiser.Fundraiser;
 import com.keep.changes.user.User;
 
 import jakarta.persistence.Column;
@@ -10,7 +7,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,9 +30,6 @@ public class Pan {
 	@Column(columnDefinition = "varchar(30)", nullable = false)
 	private String nameOnPan;
 
-//	@Column(columnDefinition = "varchar(100)", nullable = false)
-//	private String panImage;
-
 	@Column(columnDefinition = "varchar(100)", nullable = false)
 	private String address;
 
@@ -55,8 +48,8 @@ public class Pan {
 	@OneToOne
 	private User panHolder;
 
-	@OneToMany(mappedBy = "pan")
-	private Set<Fundraiser> fundraisers;
+//	@OneToMany(mappedBy = "pan")
+//	private Set<Fundraiser> fundraisers;
 
 	public void putUpdatePan(Long id, String panNumber, String nameOnPan, String address, String city, String state,
 			String country, String pincode) {

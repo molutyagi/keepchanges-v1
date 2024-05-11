@@ -109,6 +109,19 @@ public class UserController {
 	}
 
 //	GET Mapping / Get Users
+
+//	get currently logged in user
+	@GetMapping(value = { "user/current/me", "user/current/me/" })
+	public ResponseEntity<?> getCurrentUser() {
+		System.out.println("aaya ");
+		try {
+			UserDto currentUser = this.userService.getCurrentUser();
+			return ResponseEntity.ok(currentUser);
+		} catch (Exception e) {
+			throw new ApiException("Kindly log in", HttpStatus.UNAUTHORIZED, false);
+		}
+	}
+
 //	Get all
 	@GetMapping(value = { "getall", "", "/", "getall/" })
 	public ResponseEntity<List<UserDto>> getAllUsers() {

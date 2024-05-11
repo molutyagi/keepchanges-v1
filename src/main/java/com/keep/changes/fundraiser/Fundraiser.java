@@ -6,13 +6,13 @@ import java.util.Set;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.keep.changes.account.Account;
 import com.keep.changes.address.Address;
 import com.keep.changes.category.Category;
 import com.keep.changes.donation.FundraiserDonation;
 import com.keep.changes.fundraiser.photo.Photo;
-import com.keep.changes.pan.Pan;
 import com.keep.changes.user.User;
 
 import jakarta.persistence.CascadeType;
@@ -73,6 +73,7 @@ public class Fundraiser {
 	private Date startDate;
 
 	@Temporal(TemporalType.TIMESTAMP)
+	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private Date endDate;
 
 	@UpdateTimestamp
@@ -81,9 +82,6 @@ public class Fundraiser {
 
 	@Column(columnDefinition = "varchar(100)")
 	private String displayPhoto;
-
-	@Column(columnDefinition = "varchar(100)")
-	private String coverPhoto;
 
 	private boolean isActive = false;
 
@@ -109,9 +107,9 @@ public class Fundraiser {
 	@JoinTable(name = "fundraiser_address", joinColumns = @JoinColumn(name = "fundraiser", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "address", referencedColumnName = "id"))
 	private Address address;
 
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "fundraiser_pan", joinColumns = @JoinColumn(name = "fundraiser", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "pan", referencedColumnName = "id"))
-	private Pan pan;
+//	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//	@JoinTable(name = "fundraiser_pan", joinColumns = @JoinColumn(name = "fundraiser", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "pan", referencedColumnName = "id"))
+//	private Pan pan;
 
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //	@JoinTable(name = "fundraiser_account", joinColumns = @JoinColumn(name = "fundraiser", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "account", referencedColumnName = "id"))
@@ -132,7 +130,6 @@ public class Fundraiser {
 		this.phone = phone;
 		this.endDate = endDate;
 		this.displayPhoto = displayPhoto;
-		this.coverPhoto = coverPhoto;
 	}
 
 	@Override
@@ -140,10 +137,10 @@ public class Fundraiser {
 		return "Fundraiser [id=" + id + ", fundraiserTitle=" + fundraiserTitle + ", fundraiserDescription="
 				+ fundraiserDescription + ", cause=" + cause + ", raiseGoal=" + raiseGoal + ", raised=" + raised
 				+ ", email=" + email + ", phone=" + phone + ", startDate=" + startDate + ", endDate=" + endDate
-				+ ", lastModifiedDate=" + lastModifiedDate + ", displayPhoto=" + displayPhoto + ", coverPhoto="
-				+ coverPhoto + ", isActive=" + isActive + ", approval=" + approval + ", status=" + status
-				+ ", category=" + category + ", postedBy=" + postedBy + ", photos=" + photos + ", address=" + address
-				+ ", pan=" + pan + ", account=" + account + ", donations=" + donations + "]";
+				+ ", lastModifiedDate=" + lastModifiedDate + ", displayPhoto=" + displayPhoto + ", isActive=" + isActive
+				+ ", approval=" + approval + ", status=" + status + ", category=" + category + ", postedBy=" + postedBy
+				+ ", photos=" + photos + ", address=" + address + ", account=" + account + ", donations=" + donations
+				+ "]";
 	}
 
 }

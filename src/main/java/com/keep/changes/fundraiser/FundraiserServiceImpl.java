@@ -46,14 +46,8 @@ public class FundraiserServiceImpl implements FundraiserService {
 	@Value("${fundraiser-profile.images}")
 	private String displayImagePath;
 
-	@Value("${fundraiser-cover.images}")
-	private String coverImagePath;
-
 	@Value("${fundraiser-profile.default}")
 	private String DEFAULT_DISPLAY_IMAGE;
-
-	@Value("${fundraiser-profile.default}")
-	private String DEFAULT_COVER_IMAGE;
 
 //	create
 	@Override
@@ -95,9 +89,9 @@ public class FundraiserServiceImpl implements FundraiserService {
 				fd.getRaiseGoal(), fd.getEmail(), fd.getPhone(), fd.getEndDate(), fd.getDisplayPhoto(),
 				fd.getCoverPhoto());
 
-		this.fundraiserRepository.save(fundraiser);
+		Fundraiser updated = this.fundraiserRepository.save(fundraiser);
 
-		return this.modelMapper.map(fundraiser, FundraiserDto.class);
+		return this.modelMapper.map(updated, FundraiserDto.class);
 	}
 
 //	patch update
@@ -116,15 +110,8 @@ public class FundraiserServiceImpl implements FundraiserService {
 			try {
 				Object value = field.get(partialFundraiser);
 				if (value != null) {
-					System.out.println("2");
-					System.out.println(field + " : field , value : " + value);
-
 					if (field.getName().equals("displayPhoto")) {
 						this.hasPreviousDisplay(fundraiser);
-					}
-
-					if (field.getName().equals("coverPhoto")) {
-						this.hasPreviousCover(fundraiser);
 					}
 
 					field.set(fundraiser, value);
@@ -134,11 +121,8 @@ public class FundraiserServiceImpl implements FundraiserService {
 				throw new ApiException("error updating fundraiser", HttpStatus.BAD_REQUEST, false);
 			}
 		}
-		System.out.println(fundraiser);
-		System.out.println("second last");
-		this.fundraiserRepository.save(fundraiser);
-		System.out.println("finally");
-		return this.modelMapper.map(fundraiser, FundraiserDto.class);
+		Fundraiser updated = this.fundraiserRepository.save(fundraiser);
+		return this.modelMapper.map(updated, FundraiserDto.class);
 	}
 
 //	delete
@@ -150,7 +134,6 @@ public class FundraiserServiceImpl implements FundraiserService {
 
 		try {
 			this.hasPreviousDisplay(fundraiser);
-			this.hasPreviousCover(fundraiser);
 			this.fundraiserRepository.delete(fundraiser);
 		} catch (Exception e) {
 			throw new ApiException("OOPS!! Something went wrong. Could not delete fundraiser.",
@@ -169,22 +152,6 @@ public class FundraiserServiceImpl implements FundraiserService {
 		}
 
 		fundraiser.setDisplayPhoto(DEFAULT_DISPLAY_IMAGE);
-		this.fundraiserRepository.save(fundraiser);
-		return true;
-	}
-
-	@Override
-	@Transactional
-	public boolean deleteCover(@Valid Long fId) {
-
-		Fundraiser fundraiser = this.fundraiserRepository.findById(fId)
-				.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id", fId));
-
-		if (!this.hasPreviousCover(fundraiser)) {
-			return false;
-		}
-
-		fundraiser.setCoverPhoto(DEFAULT_COVER_IMAGE);
 		this.fundraiserRepository.save(fundraiser);
 		return true;
 	}
@@ -306,30 +273,6 @@ public class FundraiserServiceImpl implements FundraiserService {
 
 			if (isDeleted == false) {
 				throw new ApiException("OOPS!! Something went wrong. Could not update display image.",
-						HttpStatus.BAD_REQUEST, false);
-			}
-		}
-		return isDeleted;
-	}
-
-//	delete if previous cover exists
-	private boolean hasPreviousCover(Fundraiser fundraiser) {
-
-		boolean isDeleted = false;
-
-		if (fundraiser.getCoverPhoto() != null && !fundraiser.getCoverPhoto().equals("")
-				&& !fundraiser.getCoverPhoto().equals(this.DEFAULT_COVER_IMAGE)) {
-
-			try {
-				this.fileService.deleteFile(coverImagePath, fundraiser.getCoverPhoto());
-				isDeleted = true;
-			} catch (IOException e) {
-				throw new ApiException("OOPS!! Something went wrong. Could not update cover image.",
-						HttpStatus.BAD_REQUEST, false);
-			}
-
-			if (isDeleted == false) {
-				throw new ApiException("OOPS!! Something went wrong. Could not update cover image.",
 						HttpStatus.BAD_REQUEST, false);
 			}
 		}

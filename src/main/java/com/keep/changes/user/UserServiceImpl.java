@@ -12,6 +12,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -87,8 +89,9 @@ public class UserServiceImpl implements UserService {
 		User user = this.userRepository.findById(uId)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Id", uId));
 
-		user.setUpdateUser(uId, ud.getName(), ud.getEmail(), this.passwordEncoder.encode(ud.getPassword()),
-				ud.getPhone(), ud.getDisplayImage(), ud.getCoverImage(), ud.getAbout());
+		user.setUpdateUser(uId, ud.getName(), ud.getEmail().toLowerCase(),
+				this.passwordEncoder.encode(ud.getPassword()), ud.getPhone(), ud.getDisplayImage(), ud.getCoverImage(),
+				ud.getAbout());
 
 		User updatedUser = this.userRepository.save(user);
 		return this.modelMapper.map(updatedUser, UserDto.class);
@@ -117,10 +120,12 @@ public class UserServiceImpl implements UserService {
 						break;
 					}
 
-					System.out.println(field + " : field , value : " + value);
 					if (field.getName().equals("password")) {
-
 						value = this.passwordEncoder.encode(value.toString());
+					}
+
+					if (field.getName().equals("email")) {
+						value = value.toString().toLowerCase();
 					}
 
 					if (field.getName().equals("displayImage")) {
@@ -138,9 +143,8 @@ public class UserServiceImpl implements UserService {
 				throw new RuntimeException("error updating user", e);
 			}
 		}
-		System.out.println("3");
-		this.userRepository.save(user);
-		return this.modelMapper.map(user, UserDto.class);
+		User updatedUser = this.userRepository.save(user);
+		return this.modelMapper.map(updatedUser, UserDto.class);
 	}
 
 //	Update user email
@@ -148,7 +152,7 @@ public class UserServiceImpl implements UserService {
 		User user = this.userRepository.findById(uId)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Id", uId));
 
-		user.setEmail(userDto.getEmail());
+		user.setEmail(userDto.getEmail().toLowerCase());
 		this.userRepository.save(user);
 		String accessToken = this.jwtService.generateAccessToken(user);
 		String refreshToken = this.jwtService.generateRefreshToken(user);
@@ -208,6 +212,15 @@ public class UserServiceImpl implements UserService {
 	}
 
 //	Get User
+
+//	Get currently logged in user
+	public UserDto getCurrentUser() {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		User currentUser = (User) authentication.getPrincipal();
+
+		return this.modelMapper.map(currentUser, UserDto.class);
+	}
+
 //	By Id
 	@Override
 	@Transactional
@@ -322,6 +335,24 @@ public class UserServiceImpl implements UserService {
 //			throw new ResourceNotFoundException("User", "Keyword", keyWord);
 //		}
 		return userDtos;
+	}
+
+//	check if email already exists
+	public boolean emailExists(String email) {
+		Optional<User> byEmail = this.userRepository.findByEmail(email);
+		if (byEmail.isPresent()) {
+			return true;
+		}
+		return false;
+	}
+
+//	check if email already exists
+	public boolean phoneExists(String phone) {
+		Optional<User> byPhone = this.userRepository.findByPhone(phone);
+		if (byPhone.isPresent()) {
+			return true;
+		}
+		return false;
 	}
 
 //	delete if previous profile exists

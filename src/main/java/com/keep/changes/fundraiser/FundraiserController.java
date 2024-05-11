@@ -72,9 +72,6 @@ public class FundraiserController {
 	@Value("${fundraiser-profile.images}")
 	private String displayImagePath;
 
-	@Value("${fundraiser-cover.images}")
-	private String coverImagePath;
-
 	@Value("${fundraiser.images}")
 	private String fundraiserImages;
 
@@ -84,27 +81,24 @@ public class FundraiserController {
 	@Value("${fundraiser-profile.default}")
 	private String DEFAULT_DISPLAY_IMAGE;
 
-	@Value("${fundraiser-profile.default}")
-	private String DEFAULT_COVER_IMAGE;
-
 	// Fundraiser Controllers
 	// add complete fundraiser in a single request
 	@PostMapping(value = { "add", "add/" })
 	public ResponseEntity<?> createFundraiser(
-			@Valid @RequestParam(value = "displayImage", required = true) MultipartFile displayImage,
-			@RequestParam(value = "coverImage", required = true) MultipartFile coverImage,
+			@Valid @RequestParam(value = "displayImage", required = false) MultipartFile displayImage,
 			@RequestParam(value = "fundraiserData", required = true) String fundraiserData,
 			@RequestParam(value = "categoryId", required = true) Long categoryId) {
 
 //		verify and validate images
-		if (!this.verifyImage(displayImage) || !this.verifyImage(coverImage)) {
+		if (!this.verifyImage(displayImage)) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Select valid image");
 		}
 
 		FundraiserDto fundraiserDto = new FundraiserDto();
 		FundraiserDto createdFundraiser = null;
 		String displayImageName;
-		String coverImageName;
+
+		System.out.println(fundraiserData);
 
 		// set json data to dto
 		try {
@@ -117,15 +111,6 @@ public class FundraiserController {
 		try {
 			displayImageName = this.fileService.uploadImage(displayImagePath, displayImage);
 			fundraiserDto.setDisplayPhoto(displayImageName);
-		} catch (IOException e) {
-			throw new ApiException("OOPS!! Something went wrong. Could not create fundraiser.", HttpStatus.BAD_REQUEST,
-					false);
-		}
-
-		// save and set cover image
-		try {
-			coverImageName = this.fileService.uploadImage(coverImagePath, coverImage);
-			fundraiserDto.setCoverPhoto(coverImageName);
 		} catch (IOException e) {
 			throw new ApiException("OOPS!! Something went wrong. Could not create fundraiser.", HttpStatus.BAD_REQUEST,
 					false);
@@ -145,12 +130,6 @@ public class FundraiserController {
 						HttpStatus.BAD_REQUEST, false);
 			}
 
-			try {
-				this.fileService.deleteFile(coverImagePath, coverImageName);
-			} catch (IOException e1) {
-				throw new ApiException("OOPS!! Something went wrong. Could not create fundraiser.",
-						HttpStatus.BAD_REQUEST, false);
-			}
 		}
 		return ResponseEntity.ok(createdFundraiser);
 	}
@@ -160,7 +139,6 @@ public class FundraiserController {
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<?> updateFundraiser(@Valid @PathVariable Long fId,
 			@RequestParam(value = "displayImage", required = false) MultipartFile displayImage,
-			@RequestParam(value = "coverImage", required = false) MultipartFile coverImage,
 			@RequestParam(value = "fundraiserData", required = false) String fundraiserData,
 			@RequestParam(value = "categoryId", required = false) Long categoryId,
 			@RequestParam(value = "accountId", required = false) Long accountId,
@@ -169,9 +147,6 @@ public class FundraiserController {
 		FundraiserDto fundraiserDto = new FundraiserDto();
 		FundraiserDto updatedFundraiser = null;
 		String displayImageName = null;
-		String coverImageName = null;
-
-		System.out.println("account id " + accountId);
 
 		// set json data to dto if exists
 		if (fundraiserData != null) {
@@ -189,17 +164,6 @@ public class FundraiserController {
 				fundraiserDto.setDisplayPhoto(displayImageName);
 			} catch (IOException e) {
 				throw new ApiException("OOPS!! Something went wrong. Could not create fundraiser.",
-						HttpStatus.BAD_REQUEST, false);
-			}
-		}
-
-		// save and set cover image
-		if (this.verifyImage(coverImage)) {
-			try {
-				coverImageName = this.fileService.uploadImage(coverImagePath, coverImage);
-				fundraiserDto.setCoverPhoto(coverImageName);
-			} catch (IOException e) {
-				throw new ApiException("OOPS!! Something went wrong. Could not update fundraiser.",
 						HttpStatus.BAD_REQUEST, false);
 			}
 		}
@@ -236,12 +200,6 @@ public class FundraiserController {
 						HttpStatus.BAD_REQUEST, false);
 			}
 
-			try {
-				this.fileService.deleteFile(coverImagePath, coverImageName);
-			} catch (IOException e1) {
-				throw new ApiException("OOPS!! Something went wrong. Could not update fundraiser.",
-						HttpStatus.BAD_REQUEST, false);
-			}
 			throw new ApiException("OOPS something went wrong could not update fundraiser",
 					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
@@ -253,8 +211,6 @@ public class FundraiserController {
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<FundraiserDto> patchUpdateFundraiser(@Valid @PathVariable Long fId,
 			@RequestBody FundraiserDto fundraiserDto) {
-		System.out.println("patch controller");
-		System.out.println(fundraiserDto);
 		return ResponseEntity.ok(this.fundraiserService.patchFundraiser(fId, fundraiserDto));
 	}
 
@@ -359,7 +315,7 @@ public class FundraiserController {
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByCategory(categoryId));
 	}
 
-	// ---------------------Fundraiser Account Controllers---------------------
+	// --------------------- Fundraiser Account Controllers ---------------------
 
 	// add fundraiser account
 	@PatchMapping(value = { "fundraiser_{fId}/account/add", "fundraiser_{fId}/account/add/" })
@@ -385,11 +341,9 @@ public class FundraiserController {
 		return ResponseEntity.ok(updatedFundraiser);
 	}
 
-	// ------------------------- All Fundraiser Photos Controllers
-	// -------------------------
+	// ------------------- All Fundraiser Photos Controllers -------------------
 
-	// ------------------------- Fundraiser Display Image Controllers
-	// -------------------------
+	// ------------------- Fundraiser Display Image Controllers -------------------
 	// update fundraiser display image
 	@PatchMapping(value = { "fundraiser_{fId}/display", "fundraiser_{fId}/display/" })
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
@@ -458,81 +412,6 @@ public class FundraiserController {
 			StreamUtils.copy(is, res.getOutputStream());
 		} catch (IOException e) {
 			throw new ApiException("OOPS!! Something went wrong. Could not get fundraiser display image.",
-					HttpStatus.INTERNAL_SERVER_ERROR, false);
-		}
-	}
-
-	// ------------------------- Fundraiser Cover Image Controllers
-	// -------------------------
-	// update cover image
-	@PatchMapping(value = { "fundraiser_{fId}/cover", "fundraiser_{fId}/cover/" })
-	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
-	public ResponseEntity<?> updateCover(@Valid @PathVariable Long fId,
-			@RequestParam("coverImage") MultipartFile coverImage) {
-
-		if (!this.verifyImage(coverImage)) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Select valid image");
-		}
-
-		FundraiserDto fundraiserDto = new FundraiserDto();
-		FundraiserDto updatedFundraiser = null;
-		String coverImageName = null;
-
-		// save image in directory
-
-		try {
-			coverImageName = this.fileService.uploadImage(coverImagePath, coverImage);
-		} catch (IOException e) {
-			return ResponseEntity.badRequest().body("OOPS Something went wrong. Could not update cover imgae");
-		}
-
-		// save in database
-		fundraiserDto.setCoverPhoto(coverImageName);
-
-		try {
-			updatedFundraiser = this.fundraiserService.patchFundraiser(fId, fundraiserDto);
-		} catch (Exception e) {
-			try {
-				this.fileService.deleteFile(coverImageName, coverImageName);
-			} catch (IOException e1) {
-				return ResponseEntity.internalServerError()
-						.body("OOPS something went wrong. Could not update cover image.");
-			}
-			throw new ApiException("OOPS soemthing went wrong could not update cover image",
-					HttpStatus.INTERNAL_SERVER_ERROR, false);
-		}
-
-		return ResponseEntity.ok(updatedFundraiser);
-	}
-
-	// delete cover image
-	@DeleteMapping(value = { "fundraiser_{fId}/cover", "fundraiser_{fId}/cover/" })
-	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
-	public ResponseEntity<ApiResponse> deleteCoverImage(@Valid @PathVariable Long fId) {
-		if (!this.fundraiserService.deleteCover(fId)) {
-			return ResponseEntity.ok(new ApiResponse("Cover image does not exist.", false));
-		}
-		return ResponseEntity.ok(new ApiResponse("Cover image deleted successfully.", false));
-	}
-
-	// get cover image
-	@GetMapping(value = { "fundraiser_{fId}/cover/{coverImageName}", "fundraiser_{fId}/cover/{coverImageName}/" })
-	public void getFundraiserCoverImage(@Valid @PathVariable Long fId, @PathVariable String coverImageName,
-			HttpServletResponse res) {
-
-		InputStream is;
-
-		try {
-			is = this.fileService.getResource(coverImagePath, coverImageName);
-		} catch (Exception e) {
-			throw new ApiException("No such image exists.", HttpStatus.BAD_REQUEST, false);
-		}
-
-		res.setContentType(MediaType.IMAGE_JPEG_VALUE);
-		try {
-			StreamUtils.copy(is, res.getOutputStream());
-		} catch (IOException e) {
-			throw new ApiException("OOPS!! Something went wrong. Could not get fundraiser cover image.",
 					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
 	}
@@ -628,8 +507,7 @@ public class FundraiserController {
 	// get all fundraiser images
 	// <-------------------- -------------------->
 
-	// ------------------------- Fundraiser Documents Controllers
-	// -------------------------
+	// ------------------ Fundraiser Documents Controllers ------------------
 	// add documents
 	@PostMapping(value = { "fundraiser_{fId}/add-documents", "fundraiser_{fId}/add-documents/" })
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")

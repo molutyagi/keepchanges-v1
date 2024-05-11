@@ -7,7 +7,7 @@ public interface FundraiserDocumentService {
 
 //	add
 //	single
-	FundraiserDocumentDto addPhoto(Long fId, FundraiserDocumentDto documentDto);
+	FundraiserDocumentDto addDocument(Long fId, FundraiserDocumentDto documentDto);
 
 //	all at once
 	List<FundraiserDocumentDto> addAllDocuments(Long fId, List<FundraiserDocumentDto> documentDto);

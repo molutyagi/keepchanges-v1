@@ -6,9 +6,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.keep.changes.account.AccountDto;
-import com.keep.changes.donation.FundraiserDonationDto;
-import com.keep.changes.fundraiser.FundraiserDto;
 import com.keep.changes.pan.PanDto;
 import com.keep.changes.role.RoleDto;
 

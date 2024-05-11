@@ -97,8 +97,8 @@ public class FundraiserDonationServiceImpl implements FundraiserDonationService 
 			}
 		}
 
-		this.donationRepository.save(donation);
-		return this.modelMapper.map(donation, FundraiserDonationDto.class);
+		FundraiserDonation updated = this.donationRepository.save(donation);
+		return this.modelMapper.map(updated, FundraiserDonationDto.class);
 	}
 
 	@Override

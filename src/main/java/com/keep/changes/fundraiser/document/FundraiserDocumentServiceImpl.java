@@ -37,7 +37,7 @@ public class FundraiserDocumentServiceImpl implements FundraiserDocumentService 
 	private String fundraiserDocuments;
 
 	@Override
-	public FundraiserDocumentDto addPhoto(Long fId, FundraiserDocumentDto documentDto) {
+	public FundraiserDocumentDto addDocument(Long fId, FundraiserDocumentDto documentDto) {
 		Fundraiser fundraiser = this.fundraiserRepository.findById(fId)
 				.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id", fId));
 
@@ -56,7 +56,7 @@ public class FundraiserDocumentServiceImpl implements FundraiserDocumentService 
 		for (FundraiserDocumentDto docDto : documentDto) {
 			FundraiserDocument document = this.modelMapper.map(docDto, FundraiserDocument.class);
 			document.setFundraiser(fundraiser);
-			;
+			
 			allDocuments.add(document);
 		}
 
@@ -83,8 +83,8 @@ public class FundraiserDocumentServiceImpl implements FundraiserDocumentService 
 		}
 
 		document.setDocumentUrl(documentDto.getDocumentUrl());
-		FundraiserDocument savedDocument = this.documentRepository.save(document);
-		return this.modelMapper.map(savedDocument, FundraiserDocumentDto.class);
+		FundraiserDocument updatedDocument = this.documentRepository.save(document);
+		return this.modelMapper.map(updatedDocument, FundraiserDocumentDto.class);
 	}
 
 	@Override
