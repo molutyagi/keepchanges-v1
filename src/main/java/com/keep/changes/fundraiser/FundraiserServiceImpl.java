@@ -67,7 +67,7 @@ public class FundraiserServiceImpl implements FundraiserService {
 			fundraiser.setActive(true);
 			fundraiser.setStatus(FundraiserStatus.ACTIVE);
 			fundraiser.setApproval(AdminApproval.APPROVED);
-			fundraiser.setAdminRemarks("This fundraiser is created by admin himself.");
+			fundraiser.setAdminRemarks("This fundraiser is created by the keep changes team itself.");
 		} else {
 			fundraiser.setStatus(FundraiserStatus.INACTIVE);
 			fundraiser.setApproval(AdminApproval.PENDING);
@@ -287,7 +287,9 @@ public class FundraiserServiceImpl implements FundraiserService {
 
 		fundraiser.setAdminRemarks(adminRemarks);
 		fundraiser.setApproval(adminStatus);
-		fundraiser.setActive(true);
+		if (adminStatus.equals(AdminApproval.APPROVED)) {
+			fundraiser.setActive(true);
+		}
 
 		this.fundraiserRepository.save(fundraiser);
 

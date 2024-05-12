@@ -18,7 +18,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/auth/")
+@RequestMapping("api/auth")
 public class AuthController {
 
 	@Autowired
@@ -41,7 +41,7 @@ public class AuthController {
 
 	@PostMapping("register")
 	public ResponseEntity<AuthenticationResponse> register(@Valid @RequestBody UserDto userDto) {
-
+		System.out.println("in controller");
 		return ResponseEntity.ok(this.authenticationService.register(userDto));
 	}
 

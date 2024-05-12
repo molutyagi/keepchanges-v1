@@ -30,6 +30,8 @@ import com.keep.changes.security.jwt.JwtService;
 import com.keep.changes.user.User;
 import com.keep.changes.user.UserDto;
 import com.keep.changes.user.UserRepository;
+import com.keep.changes.user.token.Token;
+import com.keep.changes.user.token.TokenRepository;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -53,6 +55,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	private RoleRepository roleRepository;
 
 	@Autowired
+	private TokenRepository tokenRepository;
+
+	@Autowired
 	private JwtService jwtService;
 
 	@Autowired
@@ -69,6 +74,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		Optional<User> userWithPhone = this.userRepository.findByPhone(userDto.getPhone());
 		if (userWithPhone.isPresent()) {
 			throw new ResourceAlreadyExistsException("User", "Phone", userDto.getPhone());
+		}
+
+		Token token = this.tokenRepository.findLatestTokenByEmail(userDto.getEmail()).orElseThrow(
+				() -> new ApiException("You have not verified your email yet.", HttpStatus.UNAUTHORIZED, false));
+
+		if (token.getVerified() == false) {
+			throw new ApiException("You have not verified your email yet.", HttpStatus.UNAUTHORIZED, false);
 		}
 
 		User newUser = this.modelMapper.map(userDto, User.class);
