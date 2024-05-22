@@ -91,7 +91,7 @@ public class FundraiserController {
 
 //		verify and validate images
 		if (!this.verifyImage(displayImage)) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Select valid image");
+			throw new ApiException("Select valid image", HttpStatus.BAD_REQUEST, false);
 		}
 
 		FundraiserDto fundraiserDto = new FundraiserDto();
@@ -104,7 +104,7 @@ public class FundraiserController {
 		try {
 			fundraiserDto = this.objectMapper.readValue(fundraiserData, FundraiserDto.class);
 		} catch (JsonProcessingException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Request!");
+			throw new ApiException("Invalid request data.", HttpStatus.BAD_REQUEST, false);
 		}
 
 		// save and set display image
@@ -116,20 +116,22 @@ public class FundraiserController {
 					false);
 		}
 
+		// get category
+		CategoryDto categoryDto = this.categoryService.getById(categoryId);
+		fundraiserDto.setCategory(categoryDto);
+
 		// save fundraiser
 		try {
-			// get category
-			CategoryDto categoryDto = this.categoryService.getById(categoryId);
-			fundraiserDto.setCategory(categoryDto);
 			createdFundraiser = this.fundraiserService.createFundraiser(fundraiserDto);
 		} catch (Exception e) {
 			try {
 				this.fileService.deleteFile(displayImagePath, displayImageName);
 			} catch (IOException e1) {
 				throw new ApiException("OOPS!! Something went wrong. Could not create fundraiser.",
-						HttpStatus.BAD_REQUEST, false);
+						HttpStatus.INTERNAL_SERVER_ERROR, false);
 			}
-
+			throw new ApiException("OOPS!! Something went wrong. Could not create fundraiser.",
+					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
 		return ResponseEntity.ok(createdFundraiser);
 	}
@@ -153,7 +155,7 @@ public class FundraiserController {
 			try {
 				fundraiserDto = this.objectMapper.readValue(fundraiserData, FundraiserDto.class);
 			} catch (JsonProcessingException e) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Request!");
+				throw new ApiException("Invalid request!", HttpStatus.BAD_REQUEST, false);
 			}
 		}
 
@@ -185,7 +187,7 @@ public class FundraiserController {
 				AccountDto account = this.accountService.addAccount(accountDto);
 				fundraiserDto.setAccount(account);
 			} catch (JsonProcessingException e) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Request!");
+				throw new ApiException("Invalid request!", HttpStatus.BAD_REQUEST, false);
 			}
 		}
 
@@ -219,7 +221,6 @@ public class FundraiserController {
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<FundraiserDto> putUpdateFundraiser(@Valid @PathVariable Long fId,
 			@Valid @RequestBody FundraiserDto fundraiserDto) {
-		System.out.println(fundraiserDto);
 		return ResponseEntity.ok(this.fundraiserService.putUpdateFundraiser(fId, fundraiserDto));
 	}
 
@@ -252,7 +253,6 @@ public class FundraiserController {
 	@DeleteMapping("fundraiser_{fId}")
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<ApiResponse> deleteFundraiser(@Valid @PathVariable Long fId) {
-		System.out.println("controller");
 		this.fundraiserService.deleteFundraiser(fId);
 		return ResponseEntity.ok(new ApiResponse("Fundraiser Deleted Successfully!!", true));
 	}
@@ -351,7 +351,7 @@ public class FundraiserController {
 			@RequestParam("displayImage") MultipartFile displayImage) {
 
 		if (!this.verifyImage(displayImage)) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Select valid image");
+			throw new ApiException("Select valid image", HttpStatus.BAD_REQUEST, false);
 		}
 
 		FundraiserDto fundraiserDto = new FundraiserDto();
@@ -362,7 +362,8 @@ public class FundraiserController {
 		try {
 			displayImageName = this.fileService.uploadImage(displayImagePath, displayImage);
 		} catch (IOException e) {
-			return ResponseEntity.badRequest().body("OOPS Something went wrong. Could not update display image");
+			throw new ApiException("OOPS Something went wrong. Could not update display image",
+					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
 
 		// save in database
@@ -374,8 +375,8 @@ public class FundraiserController {
 			try {
 				this.fileService.deleteFile(displayImageName, displayImageName);
 			} catch (IOException e1) {
-				return ResponseEntity.internalServerError()
-						.body("OOPS something went wrong. Could not update display image.");
+				throw new ApiException("OOPS Something went wrong. Could not update display image",
+						HttpStatus.INTERNAL_SERVER_ERROR, false);
 			}
 			throw new ApiException("OOPS soemthing went wrong could not update display image",
 					HttpStatus.INTERNAL_SERVER_ERROR, false);
@@ -426,7 +427,7 @@ public class FundraiserController {
 
 		for (MultipartFile image : images) {
 			if (!this.verifyImage(image)) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Select valid image");
+				throw new ApiException("Select valid image", HttpStatus.BAD_REQUEST, false);
 			}
 		}
 
@@ -454,7 +455,7 @@ public class FundraiserController {
 			@RequestParam("fundraiserPhoto") MultipartFile fundraiserPhoto) {
 
 		if (!this.verifyImage(fundraiserPhoto)) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Select valid image");
+			throw new ApiException("Select valid image", HttpStatus.BAD_REQUEST, false);
 		}
 
 		PhotoDto photoDto = new PhotoDto();
@@ -516,7 +517,7 @@ public class FundraiserController {
 
 		for (MultipartFile document : documents) {
 			if (!this.verifyImage(document)) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Select valid image");
+				throw new ApiException("Select valid image", HttpStatus.BAD_REQUEST, false);
 			}
 		}
 
@@ -543,7 +544,7 @@ public class FundraiserController {
 			@RequestParam("document") MultipartFile document) {
 
 		if (!this.verifyImage(document)) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Select valid image");
+			throw new ApiException("Select valid image", HttpStatus.BAD_REQUEST, false);
 		}
 
 		FundraiserDocumentDto documentDto = new FundraiserDocumentDto();

@@ -38,7 +38,7 @@ public class UserDto {
 	@JsonProperty(value = "password", access = JsonProperty.Access.WRITE_ONLY)
 	private String password;
 
-//	@NotEmpty
+	@NotEmpty
 	@Pattern(regexp = "(0|91)?[6-9][0-9]{9}", message = "Invalid Number.")
 	private String phone;
 

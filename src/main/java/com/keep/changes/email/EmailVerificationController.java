@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.keep.changes.exception.ApiException;
 import com.keep.changes.exception.ResourceAlreadyExistsException;
 import com.keep.changes.payload.response.ApiResponse;
 import com.keep.changes.user.UserDto;
@@ -58,17 +59,16 @@ public class EmailVerificationController {
 //
 //		}
 
-		return new ResponseEntity(new ApiResponse("OTP sent to your mail successfully", true), HttpStatus.OK);
+		return ResponseEntity.ok(new ApiResponse("OTP sent to your mail successfully", true));
 	}
 
 	@PostMapping("verify-otp")
 	public ResponseEntity<?> verifyOtp(@Valid @RequestBody VerifyOtpDto verifyOtpDto) {
 		System.out.println(verifyOtpDto.getOtp());
 		if (this.tokenService.verifyToken(verifyOtpDto.getOtp())) {
-			return new ResponseEntity(new ApiResponse("Email verified successfully", true), HttpStatus.OK);
+			return ResponseEntity.ok(new ApiResponse("Email verified successfully", true));
 		}
-		return new ResponseEntity(new ApiResponse("OTP expired. Get a new OTP and retry again.", false),
-				HttpStatus.BAD_REQUEST);
+		throw new ApiException("OTP expired. Get a new OTP and retry again.", HttpStatus.BAD_REQUEST, false);
 	}
 
 	@PostMapping("reset-password")
@@ -79,6 +79,6 @@ public class EmailVerificationController {
 		user.setPassword(password);
 		this.userService.patchUpdateUser(user.getId(), user);
 
-		return new ResponseEntity(new ApiResponse("Password updated successfully", true), HttpStatus.OK);
+		return ResponseEntity.ok(new ApiResponse("Password updated successfully", true));
 	}
 }

@@ -53,7 +53,6 @@ public class CategoryController {
 			@RequestParam(value = "categoryName", required = true) String categoryName,
 			@RequestParam(value = "categoryDescription", required = true) String categoryDescription) {
 
-		System.out.println("in post controller");
 //		create a new category dto instance
 		CategoryDto categoryDto = new CategoryDto();
 
@@ -63,7 +62,7 @@ public class CategoryController {
 		try {
 			imageName = this.fileService.uploadImage(CATEGORY_SVG_PATH, categorySvg);
 		} catch (IOException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid svg. Try again.");
+			throw new ApiException("Invalid svg. Try again.", HttpStatus.BAD_REQUEST, false);
 		}
 
 		categoryDto.setCategoryName(categoryName);
@@ -107,7 +106,7 @@ public class CategoryController {
 				categoryDto.setCategorySvg(imageName);
 
 			} catch (IOException e) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid svg. Try again.");
+				throw new ApiException("Invalid svg. Try again.", HttpStatus.BAD_REQUEST, false);
 			}
 		}
 

@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
 		String msg = ex.getMessage();
 		ApiResponse apiResponse = new ApiResponse(msg, false);
 
-		return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.ALREADY_REPORTED);
+		return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.CONFLICT);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

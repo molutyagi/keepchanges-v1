@@ -179,11 +179,11 @@ public class UserController {
 			@RequestParam("image") MultipartFile image) throws IOException {
 
 		if (image.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+			throw new ApiException("Kindly select a valid image", HttpStatus.BAD_REQUEST, false);
 		}
 
 		if (!image.getContentType().startsWith("image")) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+			throw new ApiException("Kindly select a valid image", HttpStatus.BAD_REQUEST, false);
 		}
 
 		UserDto userDto = new UserDto();
@@ -194,8 +194,8 @@ public class UserController {
 		try {
 			fileName = this.fileService.uploadImage(profileImagePath, image);
 		} catch (IOException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(" OOPS!! Something went wrong. Could not update profile image.");
+			throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
+					HttpStatus.BAD_REQUEST, false);
 		}
 
 //		save in database
@@ -204,8 +204,9 @@ public class UserController {
 			updatedUser = this.userService.patchUpdateUser(uId, userDto);
 		} catch (Exception e) {
 			this.fileService.deleteFile(profileImagePath, fileName);
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(" OOPS!! Something went wrong. Could not update profile image.");
+
+			throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
+					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
 
 		return ResponseEntity.ok(updatedUser);
@@ -248,7 +249,8 @@ public class UserController {
 			@RequestParam("image") MultipartFile image) {
 
 		if (image.isEmpty()) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+			throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
+					HttpStatus.BAD_REQUEST, false);
 		}
 
 		if (!image.getContentType().startsWith("image")) {
@@ -263,8 +265,8 @@ public class UserController {
 		try {
 			fileName = this.fileService.uploadImage(coverImagePath, image);
 		} catch (IOException e) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-					.body(" OOPS!! Something went wrong. Could not update profile image.");
+			throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
+					HttpStatus.BAD_REQUEST, false);
 		}
 
 //		save in database
@@ -278,8 +280,8 @@ public class UserController {
 				throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
 						HttpStatus.BAD_REQUEST, false);
 			}
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-					.body(" OOPS!! Something went wrong. Could not update profile image.");
+			throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
+					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
 
 		return ResponseEntity.ok(updatedUser);
@@ -339,11 +341,10 @@ public class UserController {
 		}
 
 		if (profileImage != null) {
-
 			if (!profileImage.getContentType().startsWith("image")) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
+						HttpStatus.BAD_REQUEST, false);
 			}
-
 			try {
 				profileImageName = this.fileService.uploadImage(profileImagePath, profileImage);
 			} catch (IOException e) {
@@ -355,13 +356,14 @@ public class UserController {
 
 		if (coverImage != null) {
 			if (!coverImage.getContentType().startsWith("image")) {
-				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Kindly select a valid image.");
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
+						HttpStatus.BAD_REQUEST, false);
 			}
 
 			try {
 				coverImageName = this.fileService.uploadImage(coverImagePath, coverImage);
 			} catch (IOException e) {
-				throw new ApiException("OOPS!! Something went wrong. Could not update profile.",
+				throw new ApiException("OOPS!! Something went wrong. Could not update profile image.",
 						HttpStatus.INTERNAL_SERVER_ERROR, false);
 			}
 			userDto.setCoverImage(coverImageName);

@@ -103,6 +103,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		AuthenticationResponse response = new AuthenticationResponse();
 		response.setAccessToken(accessToken);
 		response.setRefreshToken(refreshToken);
+		response.setUserId(savedUser.getId());
+		response.setName(savedUser.getName());
+		response.setEmail(savedUser.getEmail());
 
 		return response;
 
@@ -123,9 +126,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		String accessToken = this.jwtService.generateAccessToken(userDetails);
 		String refreshToken = this.jwtService.generateRefreshToken(userDetails);
 
+		User user = this.userRepository.findByEmail(userRequest.getUsername())
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Email", userRequest.getUsername()));
+
 		AuthenticationResponse response = new AuthenticationResponse();
 		response.setAccessToken(accessToken);
 		response.setRefreshToken(refreshToken);
+		response.setUserId(user.getId());
+		response.setName(user.getName());
+		response.setEmail(user.getEmail());
 
 		return response;
 	}
