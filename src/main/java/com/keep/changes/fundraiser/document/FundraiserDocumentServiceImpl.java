@@ -56,7 +56,7 @@ public class FundraiserDocumentServiceImpl implements FundraiserDocumentService 
 		for (FundraiserDocumentDto docDto : documentDto) {
 			FundraiserDocument document = this.modelMapper.map(docDto, FundraiserDocument.class);
 			document.setFundraiser(fundraiser);
-			
+
 			allDocuments.add(document);
 		}
 
@@ -99,6 +99,8 @@ public class FundraiserDocumentServiceImpl implements FundraiserDocumentService 
 					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
 
+		Fundraiser fundraiser = document.getFundraiser();
+		fundraiser.getDocuments().remove(document);
 		this.documentRepository.delete(document);
 	}
 

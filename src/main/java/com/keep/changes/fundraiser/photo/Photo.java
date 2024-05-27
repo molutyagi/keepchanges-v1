@@ -29,4 +29,10 @@ public class Photo {
 
 	@ManyToOne
 	private Fundraiser fundraiser;
+
+	@Override
+	public String toString() {
+		return "Photo [id=" + id + ", photoUrl=" + photoUrl + "]";
+	}
+
 }

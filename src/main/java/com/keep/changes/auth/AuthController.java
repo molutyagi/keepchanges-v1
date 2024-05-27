@@ -39,6 +39,7 @@ public class AuthController {
 					HttpStatus.BAD_REQUEST, false);
 		}
 
+		System.out.println(responseTokens);
 		return ResponseEntity.ok(responseTokens);
 	}
 

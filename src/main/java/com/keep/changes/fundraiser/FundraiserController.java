@@ -73,6 +73,7 @@ public class FundraiserController {
 	@Autowired
 	private Validator validator;
 
+//	@Qualifier("cloudinaryFileServiceImpl")
 	@Autowired
 	private FileService fileService;
 
@@ -293,7 +294,6 @@ public class FundraiserController {
 	// Get By Email
 	@GetMapping(value = { "email/{email}", "email/{email}/", "getall/email/{email}", "getall/email/{email}/" })
 	public ResponseEntity<List<FundraiserDto>> getByEmail(@Valid @PathVariable String email) {
-
 		return ResponseEntity.ok(this.fundraiserService.getFundraiserByEmail(email));
 	}
 
@@ -319,13 +319,6 @@ public class FundraiserController {
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPoster(username));
 	}
 
-	// Get By Cause
-	@GetMapping(value = { "cause/{cause}", "cause/{cause}/", "getall/cause/{cause}", "getall/cause/{cause}/" })
-	public ResponseEntity<List<FundraiserDto>> getByCause(@Valid @PathVariable String cause) {
-
-		return ResponseEntity.ok(this.fundraiserService.getFundraisersByCause(cause));
-	}
-
 	// Get By Category
 	@GetMapping(value = { "category/{categoryId}", "category/{categoryId}/", "getall/category/{categoryId}",
 			"getall/category/{categoryId}/" })
@@ -335,7 +328,6 @@ public class FundraiserController {
 	}
 
 	// --------------------- Fundraiser Account Controllers ---------------------
-
 	// add fundraiser account
 	@PatchMapping(value = { "fundraiser_{fId}/account/add", "fundraiser_{fId}/account/add/" })
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
@@ -408,7 +400,7 @@ public class FundraiserController {
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<ApiResponse> deleteDisplayImage(@Valid @PathVariable Long fId) {
 		if (!this.fundraiserService.deleteDisplay(fId)) {
-			return ResponseEntity.ok(new ApiResponse("Display image does not exist.", false));
+			return ResponseEntity.badRequest().body(new ApiResponse("Display image does not exist.", false));
 		}
 		return ResponseEntity.ok(new ApiResponse("Display image deleted successfully.", false));
 	}
@@ -442,7 +434,10 @@ public class FundraiserController {
 	@PostMapping(value = { "fundraiser_{fId}/add-photos", "fundraiser_{fId}/add-photos/" })
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<?> uploadFundraiserPhotos(@Valid @PathVariable Long fId,
-			@RequestParam("images") MultipartFile[] images) {
+			@RequestParam("images") MultipartFile[] imagesArray) {
+
+		// Limit the array to the first 5 files if more than 5 are uploaded
+		MultipartFile[] images = Arrays.copyOfRange(imagesArray, 0, Math.min(imagesArray.length, 6));
 
 		for (MultipartFile image : images) {
 			if (!this.verifyImage(image)) {
@@ -471,7 +466,7 @@ public class FundraiserController {
 	@PatchMapping(value = { "fundraiser_{fId}/photo_{pId}", "fundraiser_{fId}/photo_{pId}/" })
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
 	public ResponseEntity<?> updateFundraiserPhoto(@Valid @PathVariable Long fId, @PathVariable Long pId,
-			@RequestParam("fundraiserPhoto") MultipartFile fundraiserPhoto) {
+			@RequestParam("image") MultipartFile fundraiserPhoto) {
 
 		if (!this.verifyImage(fundraiserPhoto)) {
 			throw new ApiException("Select valid image", HttpStatus.BAD_REQUEST, false);
@@ -526,7 +521,6 @@ public class FundraiserController {
 
 	// get all fundraiser images
 	// <-------------------- -------------------->
-
 	// ------------------ Fundraiser Documents Controllers ------------------
 	// add documents
 	@PostMapping(value = { "fundraiser_{fId}/add-documents", "fundraiser_{fId}/add-documents/" })

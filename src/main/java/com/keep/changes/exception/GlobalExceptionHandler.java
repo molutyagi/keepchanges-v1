@@ -23,6 +23,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException.Unauthorized;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
@@ -217,7 +218,16 @@ public class GlobalExceptionHandler {
 			ApiResponse response = new ApiResponse(msg, false);
 			return new ResponseEntity<ApiResponse>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		System.out.println("18 . ");
+
+		if (exception instanceof MethodArgumentTypeMismatchException ex) {
+			System.out.println("19 ");
+			msg = String.format("Failed to convert value of parameter '%s' to required type '%s'.", ex.getName(),
+					ex.getRequiredType().getSimpleName());
+			ApiResponse response = new ApiResponse(msg, false);
+			return new ResponseEntity<ApiResponse>(response, HttpStatus.BAD_REQUEST);
+		}
+
+		System.out.println(" 0 ");
 		ApiResponse response = new ApiResponse(exception.getMessage(), false);
 		return new ResponseEntity<ApiResponse>(response, HttpStatus.UNAUTHORIZED);
 	}

@@ -1,6 +1,8 @@
 package com.keep.changes.auth;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.naming.AuthenticationException;
@@ -34,6 +36,7 @@ import com.keep.changes.user.UserRepository;
 import com.keep.changes.user.token.Token;
 import com.keep.changes.user.token.TokenRepository;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -63,6 +66,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
+
+//	private final int accessCookieMaxAge = 2 * 60;
+//	private final int refreshCookieMaxAge = 5 * 60;
 
 	@Override
 	public AuthenticationResponse register(UserDto userDto) {
@@ -132,6 +138,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		response.setAccessToken(accessToken);
 		response.setRefreshToken(refreshToken);
 
+		System.out.println(response);
 		return response;
 	}
 
@@ -157,13 +164,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			if (this.jwtService.isValid(refreshToken, userDetails)) {
 
 				String accessToken = this.jwtService.generateAccessToken(userDetails);
-				AuthenticationResponse authResponse = new AuthenticationResponse();
-				authResponse.setAccessToken(accessToken);
-				authResponse.setRefreshToken(refreshToken);
+				Map<String, String> accessTokenResponse = new HashMap<>();
+				accessTokenResponse.put("refreshToken", accessToken);
 
-				new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+				new ObjectMapper().writeValue(response.getOutputStream(), accessTokenResponse);
 			}
 		}
-
 	}
+
+//	private void setTokeToHttp(String token, int maxAge) {
+//		Cookie accessTokenCookie = new Cookie("accessToken", token);
+//		accessTokenCookie.setHttpOnly(true);
+//		accessTokenCookie.setSecure(true); // Set to true in production
+//		accessTokenCookie.setPath("/");
+//		accessTokenCookie.setMaxAge(maxAge);
+//	}
 }

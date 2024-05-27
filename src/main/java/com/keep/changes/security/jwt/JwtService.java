@@ -23,7 +23,7 @@ public class JwtService {
 	private String JWT_SECRET_KEY;
 
 //	@Value("${JWT_TOKEN_VALIDITY}")
-	private long JWT_TOKEN_VALIDITY = 20 * 60 * 1000;
+	private long JWT_TOKEN_VALIDITY = 5 * 60 * 1000;
 	private long REFRESH_TOKEN_VALIDITY = 50 * 60 * 1000;
 
 //	Check if given user is valid

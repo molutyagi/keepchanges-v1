@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.keep.changes.account.AccountDto;
 import com.keep.changes.address.AddressDto;
 import com.keep.changes.category.CategoryDto;
+import com.keep.changes.fundraiser.document.FundraiserDocumentDto;
 import com.keep.changes.fundraiser.photo.PhotoDto;
 import com.keep.changes.pan.PanDto;
 import com.keep.changes.user.UserDto;
@@ -36,8 +37,8 @@ public class FundraiserDto {
 	@NotEmpty
 	private String fundraiserDescription;
 
-//	@NotEmpty
-	private String cause;
+	@NotEmpty
+	private String beneficiary;
 
 	@NonNull
 	private Double raiseGoal;
@@ -88,6 +89,8 @@ public class FundraiserDto {
 
 	private Set<PhotoDto> photos;
 
+	private Set<FundraiserDocumentDto> documents;
+
 	private AddressDto address;
 
 	private PanDto pan;
@@ -99,8 +102,8 @@ public class FundraiserDto {
 	@Override
 	public String toString() {
 		return "FundraiserDto [id=" + id + ", fundraiserTitle=" + fundraiserTitle + ", fundraiserDescription="
-				+ fundraiserDescription + ", cause=" + cause + ", raiseGoal=" + raiseGoal + ", raised=" + raised
-				+ ", email=" + email + ", phone=" + phone + ", startDate=" + startDate + ", endDate=" + endDate
+				+ fundraiserDescription + ", beneficiary=" + beneficiary + ", raiseGoal=" + raiseGoal + ", raised="
+				+ raised + ", email=" + email + ", phone=" + phone + ", startDate=" + startDate + ", endDate=" + endDate
 				+ ", lastModifiedDate=" + lastModifiedDate + ", displayPhoto=" + displayPhoto + ", coverPhoto="
 				+ coverPhoto + ", isActive=" + isActive + ", approval=" + approval + ", status=" + status
 				+ ", category=" + category + ", postedBy=" + postedBy + ", photos=" + photos + ", address=" + address
