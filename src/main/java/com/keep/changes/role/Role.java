@@ -22,7 +22,7 @@ import lombok.Setter;
 public class Role {
 
 	@Id
-	private long id;
+	private Long id;
 
 	@Column(unique = true, nullable = false)
 	private String roleName;
@@ -33,7 +33,7 @@ public class Role {
 	@JsonIgnore
 	private Set<User> users;
 
-	public Role(long id, String roleName, String roleDescription) {
+	public Role(Long id, String roleName, String roleDescription) {
 		super();
 		this.id = id;
 		this.roleName = roleName;

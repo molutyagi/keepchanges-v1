@@ -85,7 +85,7 @@ public class FundraiserServiceImpl implements FundraiserService {
 		Fundraiser fundraiser = this.fundraiserRepository.findById(fId)
 				.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id", fId));
 
-		fundraiser.putUpdateFundraiser(fId, fd.getFundraiserTitle(), fd.getFundraiserDescription(), fd.getCause(),
+		fundraiser.putUpdateFundraiser(fId, fd.getFundraiserTitle(), fd.getFundraiserDescription(), fd.getBeneficiary(),
 				fd.getRaiseGoal(), fd.getEmail(), fd.getPhone(), fd.getEndDate(), fd.getDisplayPhoto(),
 				fd.getCoverPhoto());
 
@@ -231,16 +231,6 @@ public class FundraiserServiceImpl implements FundraiserService {
 
 			fundraisers.addAll(fundraisersByUser);
 		}
-
-		return fundraiserToDto(fundraisers);
-	}
-
-//	by cause
-	@Override
-	@Transactional
-	public List<FundraiserDto> getFundraisersByCause(String cause) {
-
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findByCauseContaining(cause);
 
 		return fundraiserToDto(fundraisers);
 	}

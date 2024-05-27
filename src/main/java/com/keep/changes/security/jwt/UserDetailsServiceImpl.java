@@ -3,6 +3,7 @@ package com.keep.changes.security.jwt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.keep.changes.exception.ResourceNotFoundException;
@@ -22,7 +23,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		System.out.println(username + " : username");
 		
 		return this.userRepository.findByEmail(username)
-				.orElseThrow(() -> new ResourceNotFoundException("User", "Username", username));
+				.orElseThrow(() -> new UsernameNotFoundException(username));
 	}
 
 }

@@ -90,12 +90,13 @@ public class FundraiserPhotoServiceImpl implements FundraiserPhotoService {
 
 		try {
 			this.fileService.deleteFile(fundraiserImages, photo.getPhotoUrl());
-			;
 		} catch (IOException e) {
 			throw new ApiException("OOPS!! Something went wrong. Could not fundraiser image.",
 					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
 
+		Fundraiser fundraiser = photo.getFundraiser();
+		fundraiser.getPhotos().remove(photo);
 		this.photoRepository.delete(photo);
 	}
 

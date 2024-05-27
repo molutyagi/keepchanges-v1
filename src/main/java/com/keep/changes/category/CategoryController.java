@@ -62,6 +62,7 @@ public class CategoryController {
 		try {
 			imageName = this.fileService.uploadImage(CATEGORY_SVG_PATH, categorySvg);
 		} catch (IOException e) {
+			e.printStackTrace();
 			throw new ApiException("Invalid svg. Try again.", HttpStatus.BAD_REQUEST, false);
 		}
 

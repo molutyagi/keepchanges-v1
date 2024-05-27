@@ -12,6 +12,7 @@ import com.keep.changes.account.Account;
 import com.keep.changes.address.Address;
 import com.keep.changes.category.Category;
 import com.keep.changes.donation.FundraiserDonation;
+import com.keep.changes.fundraiser.document.FundraiserDocument;
 import com.keep.changes.fundraiser.photo.Photo;
 import com.keep.changes.user.User;
 
@@ -54,11 +55,11 @@ public class Fundraiser {
 	private String fundraiserDescription;
 
 	@Column(columnDefinition = "varchar(100)")
-	private String cause;
+	private String beneficiary;
 
 	private Double raiseGoal;
 
-	private Double raised;
+	private Double raised = 0.0;
 
 	@Email
 	@Column(columnDefinition = "varchar(30)")
@@ -102,6 +103,9 @@ public class Fundraiser {
 
 	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Photo> photos = new HashSet<>();
+	
+	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private Set<FundraiserDocument> documents = new HashSet<>();
 
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinTable(name = "fundraiser_address", joinColumns = @JoinColumn(name = "fundraiser", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "address", referencedColumnName = "id"))
@@ -118,13 +122,13 @@ public class Fundraiser {
 	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<FundraiserDonation> donations = new HashSet<>();
 
-	public void putUpdateFundraiser(Long id, String fundraiserTitle, String fundraiserDescription, String cause,
+	public void putUpdateFundraiser(Long id, String fundraiserTitle, String fundraiserDescription, String beneficiary,
 			double raiseGoal, String email, String phone, Date endDate, String displayPhoto, String coverPhoto) {
 
 		this.id = id;
 		this.fundraiserTitle = fundraiserTitle;
 		this.fundraiserDescription = fundraiserDescription;
-		this.cause = cause;
+		this.beneficiary = beneficiary;
 		this.raiseGoal = raiseGoal;
 		this.email = email;
 		this.phone = phone;
@@ -135,8 +139,8 @@ public class Fundraiser {
 	@Override
 	public String toString() {
 		return "Fundraiser [id=" + id + ", fundraiserTitle=" + fundraiserTitle + ", fundraiserDescription="
-				+ fundraiserDescription + ", cause=" + cause + ", raiseGoal=" + raiseGoal + ", raised=" + raised
-				+ ", email=" + email + ", phone=" + phone + ", startDate=" + startDate + ", endDate=" + endDate
+				+ fundraiserDescription + ", beneficiary=" + beneficiary + ", raiseGoal=" + raiseGoal + ", raised="
+				+ raised + ", email=" + email + ", phone=" + phone + ", startDate=" + startDate + ", endDate=" + endDate
 				+ ", lastModifiedDate=" + lastModifiedDate + ", displayPhoto=" + displayPhoto + ", isActive=" + isActive
 				+ ", approval=" + approval + ", status=" + status + ", category=" + category + ", postedBy=" + postedBy
 				+ ", photos=" + photos + ", address=" + address + ", account=" + account + ", donations=" + donations

@@ -20,6 +20,4 @@ public interface FundraiserRepository extends JpaRepository<Fundraiser, Long> {
 	List<Fundraiser> findByCategory(Category category);
 
 	List<Fundraiser> findByPostedBy(User user);
-
-	List<Fundraiser> findByCauseContaining(String cause);
 }

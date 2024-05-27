@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.keep.changes.pan.PanDto;
 import com.keep.changes.role.RoleDto;
 
 import jakarta.validation.constraints.Email;
@@ -61,7 +60,8 @@ public class UserDto {
 //	private AddressDto address;
 //
 //	@JsonProperty(access = Access.READ_ONLY)
-	private PanDto pan;
+//	@JsonIgnore
+//	private PanDto pan;
 //
 //	@JsonProperty(access = Access.READ_ONLY)
 //	private Set<AccountDto> accounts = new HashSet<>();

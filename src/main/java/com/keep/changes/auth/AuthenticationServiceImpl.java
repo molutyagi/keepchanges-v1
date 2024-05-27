@@ -1,6 +1,8 @@
 package com.keep.changes.auth;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.naming.AuthenticationException;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -33,6 +36,7 @@ import com.keep.changes.user.UserRepository;
 import com.keep.changes.user.token.Token;
 import com.keep.changes.user.token.TokenRepository;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -62,6 +66,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
+
+//	private final int accessCookieMaxAge = 2 * 60;
+//	private final int refreshCookieMaxAge = 5 * 60;
 
 	@Override
 	public AuthenticationResponse register(UserDto userDto) {
@@ -103,9 +110,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		AuthenticationResponse response = new AuthenticationResponse();
 		response.setAccessToken(accessToken);
 		response.setRefreshToken(refreshToken);
-		response.setUserId(savedUser.getId());
-		response.setName(savedUser.getName());
-		response.setEmail(savedUser.getEmail());
 
 		return response;
 
@@ -115,27 +119,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	public AuthenticationResponse login(AuthenticationRequest userRequest) throws AuthenticationException {
 
 		try {
+			System.out.println("1 error here");
+
 			this.authenticationManager.authenticate(
 					new UsernamePasswordAuthenticationToken(userRequest.getUsername(), userRequest.getPassword()));
-		} catch (BadCredentialsException e) {
-			throw new ApiException("Invalid Password. Enter correct password.", HttpStatus.BAD_REQUEST, false);
+			System.out.println(" 2 error here");
+		} catch (BadCredentialsException | InternalAuthenticationServiceException e) {
+			throw new ApiException("Incorrect User Credentials. Kindly enter correct credentials.",
+					HttpStatus.UNAUTHORIZED, false);
 		}
-
+		System.out.println("bfore user details");
 		UserDetails userDetails = this.userDetailsService.loadUserByUsername(userRequest.getUsername());
 
 		String accessToken = this.jwtService.generateAccessToken(userDetails);
 		String refreshToken = this.jwtService.generateRefreshToken(userDetails);
 
-		User user = this.userRepository.findByEmail(userRequest.getUsername())
-				.orElseThrow(() -> new ResourceNotFoundException("User", "Email", userRequest.getUsername()));
-
 		AuthenticationResponse response = new AuthenticationResponse();
 		response.setAccessToken(accessToken);
 		response.setRefreshToken(refreshToken);
-		response.setUserId(user.getId());
-		response.setName(user.getName());
-		response.setEmail(user.getEmail());
 
+		System.out.println(response);
 		return response;
 	}
 
@@ -161,13 +164,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			if (this.jwtService.isValid(refreshToken, userDetails)) {
 
 				String accessToken = this.jwtService.generateAccessToken(userDetails);
-				AuthenticationResponse authResponse = new AuthenticationResponse();
-				authResponse.setAccessToken(accessToken);
-				authResponse.setRefreshToken(refreshToken);
+				Map<String, String> accessTokenResponse = new HashMap<>();
+				accessTokenResponse.put("refreshToken", accessToken);
 
-				new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+				new ObjectMapper().writeValue(response.getOutputStream(), accessTokenResponse);
 			}
 		}
-
 	}
+
+//	private void setTokeToHttp(String token, int maxAge) {
+//		Cookie accessTokenCookie = new Cookie("accessToken", token);
+//		accessTokenCookie.setHttpOnly(true);
+//		accessTokenCookie.setSecure(true); // Set to true in production
+//		accessTokenCookie.setPath("/");
+//		accessTokenCookie.setMaxAge(maxAge);
+//	}
 }

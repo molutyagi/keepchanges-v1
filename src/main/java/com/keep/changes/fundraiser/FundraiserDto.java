@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.keep.changes.account.AccountDto;
 import com.keep.changes.address.AddressDto;
 import com.keep.changes.category.CategoryDto;
+import com.keep.changes.fundraiser.document.FundraiserDocumentDto;
 import com.keep.changes.fundraiser.photo.PhotoDto;
 import com.keep.changes.pan.PanDto;
 import com.keep.changes.user.UserDto;
@@ -37,7 +38,7 @@ public class FundraiserDto {
 	private String fundraiserDescription;
 
 	@NotEmpty
-	private String cause;
+	private String beneficiary;
 
 	@NonNull
 	private Double raiseGoal;
@@ -50,13 +51,13 @@ public class FundraiserDto {
 	@Pattern(regexp = "^([a-zA-Z0-9._%-]{4,}+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})$", message = "Given email is not valid.")
 	private String email;
 
-//	@NotEmpty
-	@Pattern(regexp = "(0|91)?[6-9][0-9]{9}", message = "Invalid Number.")
+	@NotEmpty
+//	@Pattern(regexp = "(0|91)?[6-9][0-9]{9}", message = "Invalid Number Format.")
 	private String phone;
 
 	@JsonProperty(access = Access.READ_ONLY)
 	private Date startDate;
-	
+
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
 	private Date endDate;
 
@@ -88,6 +89,8 @@ public class FundraiserDto {
 
 	private Set<PhotoDto> photos;
 
+	private Set<FundraiserDocumentDto> documents;
+
 	private AddressDto address;
 
 	private PanDto pan;
@@ -99,8 +102,8 @@ public class FundraiserDto {
 	@Override
 	public String toString() {
 		return "FundraiserDto [id=" + id + ", fundraiserTitle=" + fundraiserTitle + ", fundraiserDescription="
-				+ fundraiserDescription + ", cause=" + cause + ", raiseGoal=" + raiseGoal + ", raised=" + raised
-				+ ", email=" + email + ", phone=" + phone + ", startDate=" + startDate + ", endDate=" + endDate
+				+ fundraiserDescription + ", beneficiary=" + beneficiary + ", raiseGoal=" + raiseGoal + ", raised="
+				+ raised + ", email=" + email + ", phone=" + phone + ", startDate=" + startDate + ", endDate=" + endDate
 				+ ", lastModifiedDate=" + lastModifiedDate + ", displayPhoto=" + displayPhoto + ", coverPhoto="
 				+ coverPhoto + ", isActive=" + isActive + ", approval=" + approval + ", status=" + status
 				+ ", category=" + category + ", postedBy=" + postedBy + ", photos=" + photos + ", address=" + address

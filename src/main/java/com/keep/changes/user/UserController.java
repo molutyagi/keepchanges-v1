@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -111,18 +112,20 @@ public class UserController {
 //	GET Mapping / Get Users
 
 //	get currently logged in user
-	@GetMapping(value = { "user/current/me", "user/current/me/" })
+	@GetMapping(value = { "user/me", "user/me/" })
+//	@Cacheable
 	public ResponseEntity<?> getCurrentUser() {
 		System.out.println("aaya ");
 		try {
 			UserDto currentUser = this.userService.getCurrentUser();
 			return ResponseEntity.ok(currentUser);
 		} catch (Exception e) {
-			throw new ApiException("Kindly log in", HttpStatus.UNAUTHORIZED, false);
+			throw new ApiException("You are not logged in. Kindly log in", HttpStatus.UNAUTHORIZED, false);
 		}
 	}
 
 //	Get all
+	@Cacheable
 	@GetMapping(value = { "getall", "", "/", "getall/" })
 	public ResponseEntity<List<UserDto>> getAllUsers() {
 
@@ -132,6 +135,7 @@ public class UserController {
 
 //	Get by Id
 	@GetMapping(value = { "user_{uId}", "user_{uId}/" })
+	@Cacheable
 	public ResponseEntity<UserDto> getUserById(@PathVariable Long uId) {
 
 		return ResponseEntity.ok(this.userService.getUserById(uId));
