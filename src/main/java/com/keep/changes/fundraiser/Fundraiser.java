@@ -19,6 +19,7 @@ import com.keep.changes.user.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
@@ -42,6 +43,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@EntityListeners(FundraiserEntityListener.class)
 public class Fundraiser {
 
 	@Id
@@ -98,12 +100,15 @@ public class Fundraiser {
 	@ManyToOne
 	private Category category;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	private User postedBy;
 
 	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Photo> photos = new HashSet<>();
 	
+	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private Set<FundraiserDocument> documents = new HashSet<>();
+
 	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<FundraiserDocument> documents = new HashSet<>();
 

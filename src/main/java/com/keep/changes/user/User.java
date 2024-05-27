@@ -85,7 +85,7 @@ public class User implements UserDetails {
 
 	private Boolean isEnabled;
 
-	@ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@ManyToMany(fetch = FetchType.EAGER)
 //	@JoinTable(name = "user_role", joinColumns = @JoinColumn(name = "user", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "role", referencedColumnName = "id"))
 	private Set<Role> roles = new HashSet<>();
 
@@ -100,8 +100,7 @@ public class User implements UserDetails {
 	@OneToMany(mappedBy = "holdingEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Account> accounts = new HashSet<>();
 
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinTable(name = "user_fundraiser", joinColumns = @JoinColumn(name = "user", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "fundraiser", referencedColumnName = "id"))
+	@OneToMany(mappedBy = "postedBy", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private Set<Fundraiser> fundraisers = new HashSet<>();
 
 	@OneToMany(mappedBy = "donor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
