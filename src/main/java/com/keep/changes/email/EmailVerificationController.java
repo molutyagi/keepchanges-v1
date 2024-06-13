@@ -19,7 +19,7 @@ import com.keep.changes.user.token.TokenService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/auth/verification")
+@RequestMapping("auth/verification")
 public class EmailVerificationController {
 
 	@Autowired
@@ -32,33 +32,30 @@ public class EmailVerificationController {
 	private UserService userService;
 
 	@PostMapping("send-otp")
-	public ResponseEntity<?> sendOtp(@Valid @RequestBody GetOtpDto getOtpDto
-//			, @RequestParam("action") String action
-	) {
+	public ResponseEntity<?> sendOtp(@Valid @RequestBody GetOtpDto getOtpDto) {
 
-//		if (action.equals("register-user")) {
-//		if (this.userService.getUserByEmail(otpDto.getEmail()) != null) {
-//			throw new ResourceAlreadyExistsException("User", "Email", otpDto.getEmail());
-//		}
-//
-//		if (this.userService.getUserByPhone(otpDto.getPhone()) != null) {
-//			throw new ResourceAlreadyExistsException("User", "phone", otpDto.getPhone());
-//		}
+		if (getOtpDto.getAction().equals("register-user")) {
+			if (this.userService.getUserByEmail(getOtpDto.getEmail()) != null) {
+				throw new ResourceAlreadyExistsException("User", "Email", getOtpDto.getEmail());
+			}
 
-		if (this.userService.emailExists(getOtpDto.getEmail())) {
-			throw new ResourceAlreadyExistsException("User", "Email", getOtpDto.getEmail());
+			if (this.userService.getUserByPhone(getOtpDto.getPhone()) != null) {
+				throw new ResourceAlreadyExistsException("User", "phone", getOtpDto.getPhone());
+			}
+
+			if (this.userService.emailExists(getOtpDto.getEmail())) {
+				throw new ResourceAlreadyExistsException("User", "Email", getOtpDto.getEmail());
+			}
+			if (this.userService.phoneExists(getOtpDto.getPhone())) {
+				throw new ResourceAlreadyExistsException("User", "Phone", getOtpDto.getPhone());
+			}
+			this.emailService.sendEmail(getOtpDto.getEmail(), getOtpDto.getName(), EmailTemplateName.CONFIRM_EMAIL,
+					"email-verification");
+		} else if (getOtpDto.getAction().equals("reset-password")) {
+			UserDto user = this.userService.getUserByEmail(getOtpDto.getEmail());
+			this.emailService.sendEmail(getOtpDto.getEmail(), user.getName(), EmailTemplateName.RESET_PASSWORD,
+					"reset-password");
 		}
-		if (this.userService.phoneExists(getOtpDto.getPhone())) {
-			throw new ResourceAlreadyExistsException("User", "Phone", getOtpDto.getPhone());
-		}
-		this.emailService.sendEmail(getOtpDto.getEmail(), getOtpDto.getName(), EmailTemplateName.CONFIRM_EMAIL,
-				"email-verification");
-//		} else if (action.equals("forgot-password")) {
-//			UserDto user = this.userService.getUserByEmail(email);
-//			this.emailService.sendEmail(email, user.getName(), EmailTemplateName.RESET_PASSWORD, "reset-password");
-//
-//		}
-
 		return ResponseEntity.ok(new ApiResponse("OTP sent to your mail successfully", true));
 	}
 
@@ -69,16 +66,5 @@ public class EmailVerificationController {
 			return ResponseEntity.ok(new ApiResponse("Email verified successfully", true));
 		}
 		throw new ApiException("OTP expired. Get a new OTP and retry again.", HttpStatus.BAD_REQUEST, false);
-	}
-
-	@PostMapping("reset-password")
-	public ResponseEntity<?> resetPassword(@Valid @RequestParam("email") String email,
-			@RequestParam("password") String password) {
-
-		UserDto user = this.userService.getUserByEmail(email);
-		user.setPassword(password);
-		this.userService.patchUpdateUser(user.getId(), user);
-
-		return ResponseEntity.ok(new ApiResponse("Password updated successfully", true));
 	}
 }

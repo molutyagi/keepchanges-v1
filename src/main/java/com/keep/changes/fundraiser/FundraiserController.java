@@ -49,7 +49,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.Validator;
 
 @RestController
-@RequestMapping("api/fundraisers")
+@RequestMapping("fundraisers")
 public class FundraiserController {
 
 	@Autowired
@@ -154,7 +154,7 @@ public class FundraiserController {
 	// update complete fundraiser in a single request
 	@PatchMapping(value = { "fundraiser_{fId}", "fundraiser_{fId}/" })
 	@PreAuthorize("@fundraiserController.authenticateUser(#fId, authentication.principal.id, hasRole('ADMIN'))")
-	public ResponseEntity<?> updateFundraiser(@Valid @PathVariable Long fId,
+	public ResponseEntity<?> updateFundraiser(@Valid @PathVariable long fId,
 			@RequestParam(value = "displayImage", required = false) MultipartFile displayImage,
 			@RequestParam(value = "fundraiserData", required = false) String fundraiserData,
 			@RequestParam(value = "categoryId", required = false) Long categoryId,
@@ -285,6 +285,19 @@ public class FundraiserController {
 		return ResponseEntity.ok(this.fundraiserService.getFundraiserById(fId));
 	}
 
+	// Get Latest fundraisers
+	@GetMapping(value = { "latest", "latest/", "getall/latest", "getall/latest/" })
+	public ResponseEntity<List<FundraiserDto>> getLatestFive() {
+		System.out.println("controller");
+		return ResponseEntity.ok(this.fundraiserService.getLatestFundraiser());
+	}
+
+	// Get All Active
+	@GetMapping(value = { "active", "active/", "getall/active", "getall/active/" })
+	public ResponseEntity<List<FundraiserDto>> getAllActive() {
+		return ResponseEntity.ok(this.fundraiserService.getAllActiveFundraisers());
+	}
+
 	// Get All
 	@GetMapping(value = { "", "/", "getall", "getall/" })
 	public ResponseEntity<List<FundraiserDto>> getAll() {
@@ -311,12 +324,27 @@ public class FundraiserController {
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByTitle(title));
 	}
 
-	// Get By Poster
+	// Get By Poster(s) Email containing
 	@GetMapping(value = { "postedby/{username}", "postedby/{username}/", "getall/postedby/{username}",
 			"getall/postedby/{username}/" })
 	public ResponseEntity<List<FundraiserDto>> getByPoster(@Valid @PathVariable String username) {
 
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPoster(username));
+	}
+
+//	Get By Poster Id
+	@GetMapping(value = { "poster/{pId}", "poster/{pId}/", "getall/poster/{pId}", "getall/poster/{pId}/" })
+	public ResponseEntity<List<FundraiserDto>> getByPosterId(@Valid @PathVariable Long pId) {
+
+		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPosterId(pId));
+	}
+
+//	get user's active fundraisers
+	@GetMapping(value = { "poster/{pId}/active", "poster/{pId}/active", "getall/poster/{pId}/active",
+			"getall/poster/{pId}/active/" })
+	public ResponseEntity<List<FundraiserDto>> getActiveByPosterId(@Valid @PathVariable Long pId) {
+
+		return ResponseEntity.ok(this.fundraiserService.getActiveFundraisersByPosterId(pId));
 	}
 
 	// Get By Category
@@ -325,6 +353,21 @@ public class FundraiserController {
 	public ResponseEntity<List<FundraiserDto>> getByCategory(@Valid @PathVariable Long categoryId) {
 
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByCategory(categoryId));
+	}
+
+	// Get By Multiple Categories
+	@GetMapping(value = { "category/", "category/", "getall/category", "getall/category/" })
+	public ResponseEntity<List<FundraiserDto>> getByMultpleCategories(
+			@Valid @RequestParam("categoryIds") Long categoryIds[]) {
+		List<FundraiserDto> fundraisersDto = new ArrayList<FundraiserDto>();
+
+		for (Long categoryId : categoryIds) {
+			List<FundraiserDto> fundraisersByCategory = this.fundraiserService.getFundraisersByCategory(categoryId);
+			if (!fundraisersByCategory.isEmpty()) {
+				fundraisersDto.addAll(fundraisersByCategory);
+			}
+		}
+		return ResponseEntity.ok(fundraisersDto);
 	}
 
 	// --------------------- Fundraiser Account Controllers ---------------------
@@ -379,7 +422,6 @@ public class FundraiserController {
 
 		// save in database
 		fundraiserDto.setDisplayPhoto(displayImageName);
-
 		try {
 			updatedFundraiser = this.fundraiserService.patchFundraiser(fId, fundraiserDto);
 		} catch (Exception e) {
@@ -546,6 +588,7 @@ public class FundraiserController {
 				throw new ApiException("Could not upload files. Try again.", HttpStatus.INTERNAL_SERVER_ERROR, false);
 			}
 		});
+
 		this.documentService.addAllDocuments(fId, allDocuments);
 		return ResponseEntity.ok(new ApiResponse("Documents uploaded successfully", true));
 	}

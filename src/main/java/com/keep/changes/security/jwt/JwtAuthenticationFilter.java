@@ -1,6 +1,8 @@
 package com.keep.changes.security.jwt;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -36,6 +38,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 			@NonNull FilterChain filterChain) throws ServletException, IOException {
 
+		System.out.println("Request Method: " + request.getMethod());
+		System.out.println("Request URI: " + request.getRequestURI());
+		System.out.println("Request Headers: " + Collections.list(request.getHeaderNames()));
+
+		System.out.println("Request Parameters:");
+		request.getParameterMap().forEach((key, value) -> {
+			System.out.println("Parameter Name: " + key);
+			System.out.println("Parameter Value: " + Arrays.toString(value));
+		});
 //		1. Get Token
 		final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 		final String token;

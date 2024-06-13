@@ -34,11 +34,12 @@ import com.keep.changes.exception.ResourceNotFoundException;
 import com.keep.changes.file.FileService;
 import com.keep.changes.payload.response.ApiResponse;
 
+import io.micrometer.observation.ObservationRegistry;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/users")
+@RequestMapping("users")
 public class UserController {
 
 	@Autowired
@@ -46,6 +47,9 @@ public class UserController {
 
 	@Autowired
 	private FileService fileService;
+
+	@Autowired
+	private ObservationRegistry observationRegistry;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -339,6 +343,10 @@ public class UserController {
 		if (userData != null) {
 			try {
 				userDto = this.objectMapper.readValue(userData, UserDto.class);
+//				Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+//				if (!violations.isEmpty()) {
+//					throw new ConstraintViolationException(violations);
+//				}
 			} catch (JsonProcessingException e) {
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid Request!");
 			}

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
-@RequestMapping("api/pans")
+@RequestMapping("pans")
 public class PanController {
 
 	@Autowired

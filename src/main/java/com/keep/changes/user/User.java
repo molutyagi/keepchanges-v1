@@ -80,7 +80,6 @@ public class User implements UserDetails {
 
 	@UpdateTimestamp
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(insertable = false)
 	private Date lastUpdateTime;
 
 	private Boolean isEnabled;

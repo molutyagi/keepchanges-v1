@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.keep.changes.account.AccountDto;
@@ -17,6 +18,7 @@ import com.keep.changes.user.UserDto;
 
 import io.micrometer.common.lang.NonNull;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -52,13 +54,14 @@ public class FundraiserDto {
 	private String email;
 
 	@NotEmpty
-//	@Pattern(regexp = "(0|91)?[6-9][0-9]{9}", message = "Invalid Number Format.")
+	@Pattern(regexp = "(0|91)?[6-9][0-9]{9}", message = "Invalid Number Format.")
 	private String phone;
 
 	@JsonProperty(access = Access.READ_ONLY)
 	private Date startDate;
 
 	@DateTimeFormat(pattern = "dd-MM-yyyy")
+	@Future(message = "End date can only be in future")
 	private Date endDate;
 
 	@JsonProperty(access = Access.READ_ONLY)
@@ -70,16 +73,18 @@ public class FundraiserDto {
 	private String coverPhoto;
 
 	@JsonProperty(access = Access.READ_ONLY)
-	private boolean isActive;
-
-	@JsonProperty(access = Access.READ_ONLY)
 	private AdminApproval approval;
 
 	@JsonProperty(access = Access.READ_ONLY)
 	private String adminRemarks;
 
+	private Boolean isReviewed;
+
 	@JsonProperty(access = Access.READ_ONLY)
 	private FundraiserStatus status;
+
+	@JsonProperty(access = Access.READ_ONLY)
+	private Boolean isActive;
 
 	@NonNull
 	private CategoryDto category;
@@ -95,9 +100,10 @@ public class FundraiserDto {
 
 	private PanDto pan;
 
+	@JsonIgnore
 	private AccountDto account;
 
-//	private Set<FundraiserDonationDto> donations;
+	private Set<DonationDto> donations;
 
 	@Override
 	public String toString() {
@@ -105,9 +111,9 @@ public class FundraiserDto {
 				+ fundraiserDescription + ", beneficiary=" + beneficiary + ", raiseGoal=" + raiseGoal + ", raised="
 				+ raised + ", email=" + email + ", phone=" + phone + ", startDate=" + startDate + ", endDate=" + endDate
 				+ ", lastModifiedDate=" + lastModifiedDate + ", displayPhoto=" + displayPhoto + ", coverPhoto="
-				+ coverPhoto + ", isActive=" + isActive + ", approval=" + approval + ", status=" + status
-				+ ", category=" + category + ", postedBy=" + postedBy + ", photos=" + photos + ", address=" + address
-				+ ", pan=" + pan + ", account=" + account;
+				+ coverPhoto + ", isActive=" + isActive + ", approval=" + approval + ",is Reviewed: " + isReviewed
+				+ ", status=" + status + ", category=" + category + ", postedBy=" + postedBy + ", photos=" + photos
+				+ ", address=" + address + ", pan=" + pan + ", account=" + account;
 	}
 
 }

@@ -66,13 +66,16 @@ public class FundraiserServiceImpl implements FundraiserService {
 		fundraiser.setPostedBy(user);
 
 		if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
-			fundraiser.setActive(true);
-			fundraiser.setStatus(FundraiserStatus.ACTIVE);
+			fundraiser.setIsActive(true);
+			fundraiser.setStatus(FundraiserStatus.OPEN);
 			fundraiser.setApproval(AdminApproval.APPROVED);
 			fundraiser.setAdminRemarks("This fundraiser is created by the keep changes team itself.");
+			fundraiser.setIsReviewed(true);
 		} else {
+			fundraiser.setIsActive(false);
 			fundraiser.setStatus(FundraiserStatus.INACTIVE);
 			fundraiser.setApproval(AdminApproval.PENDING);
+			fundraiser.setIsReviewed(false);
 		}
 
 		Fundraiser saved = this.fundraiserRepository.save(fundraiser);
@@ -101,17 +104,27 @@ public class FundraiserServiceImpl implements FundraiserService {
 	@Transactional
 	public FundraiserDto patchFundraiser(Long fId, FundraiserDto partialFundraiserDto) {
 
+		System.out.println("patch fundraiser");
 		Fundraiser fundraiser = this.fundraiserRepository.findById(fId)
 				.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id", fId));
-
+		System.out.println(partialFundraiserDto);
 		Fundraiser partialFundraiser = this.modelMapper.map(partialFundraiserDto, Fundraiser.class);
 
 		Field[] declaredFields = Fundraiser.class.getDeclaredFields();
 		for (Field field : declaredFields) {
+
+			if (field.getName().equals("isActive")) {
+				break;
+			}
+
+			System.out.println("field: " + field);
 			field.setAccessible(true);
 			try {
 				Object value = field.get(partialFundraiser);
 				if (value != null) {
+					System.out.println("field: " + field);
+					System.out.println("value: " + value);
+
 					if (field.getName().equals("displayPhoto")) {
 						this.hasPreviousDisplay(fundraiser);
 					}
@@ -154,7 +167,6 @@ public class FundraiserServiceImpl implements FundraiserService {
 			throw new ApiException("OOPS!! Something went wrong. Could not delete fundraiser.",
 					HttpStatus.INTERNAL_SERVER_ERROR, false);
 		}
-
 	}
 
 	@Override
@@ -173,6 +185,21 @@ public class FundraiserServiceImpl implements FundraiserService {
 	}
 
 //	get
+	@Override
+	@Transactional
+	public List<FundraiserDto> getLatestFundraiser() {
+		List<Fundraiser> fundraisers = this.fundraiserRepository.findLatestFundraisers();
+		System.out.println("service impl");
+		return this.fundraiserToDto(fundraisers);
+	}
+
+	@Override
+	@Transactional
+	public List<FundraiserDto> getAllActiveFundraisers() {
+		List<Fundraiser> fundraisers = this.fundraiserRepository.findAllActiveFundraisers();
+		return this.fundraiserToDto(fundraisers);
+	}
+
 //	by id
 	@Override
 	@Transactional
@@ -251,6 +278,28 @@ public class FundraiserServiceImpl implements FundraiserService {
 		return fundraiserToDto(fundraisers);
 	}
 
+	@Override
+	@Transactional
+	public List<FundraiserDto> getFundraisersByPosterId(Long pId) {
+		User user = this.userRepository.findById(pId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Id", pId));
+
+		List<Fundraiser> fundraisers = this.fundraiserRepository.findByPostedBy(user);
+
+		return fundraiserToDto(fundraisers);
+	}
+
+	@Override
+	@Transactional
+	public List<FundraiserDto> getActiveFundraisersByPosterId(Long pId) {
+		User user = this.userRepository.findById(pId)
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Id", pId));
+
+		List<Fundraiser> fundraisers = this.fundraiserRepository.findActiveByPostedBy(user);
+
+		return fundraiserToDto(fundraisers);
+	}
+
 	private List<FundraiserDto> fundraiserToDto(List<Fundraiser> fundraisers) {
 
 		List<FundraiserDto> fundraiserDtos = new ArrayList<FundraiserDto>();
@@ -286,6 +335,7 @@ public class FundraiserServiceImpl implements FundraiserService {
 	}
 
 	@Override
+	@Transactional
 	public void fundraiserAdminService(@Valid Long fId, String adminRemarks, AdminApproval adminStatus) {
 
 		Fundraiser fundraiser = this.fundraiserRepository.findById(fId)
@@ -294,10 +344,51 @@ public class FundraiserServiceImpl implements FundraiserService {
 		fundraiser.setAdminRemarks(adminRemarks);
 		fundraiser.setApproval(adminStatus);
 		if (adminStatus.equals(AdminApproval.APPROVED)) {
-			fundraiser.setActive(true);
+			fundraiser.setIsActive(true);
+			fundraiser.setStatus(FundraiserStatus.OPEN);
 		}
 
+		if (adminStatus.equals(AdminApproval.PENDING)) {
+			fundraiser.setIsActive(false);
+			fundraiser.setStatus(FundraiserStatus.INACTIVE);
+		}
+
+		if (adminStatus.equals(AdminApproval.DISAPPROVED)) {
+			fundraiser.setIsActive(false);
+			fundraiser.setStatus(FundraiserStatus.CANCELLED);
+		}
+		fundraiser.setIsReviewed(true);
 		this.fundraiserRepository.save(fundraiser);
 
+	}
+
+//	Admin dashboard
+	@Override
+	@Transactional
+	public Double sumOfRaised() {
+		return this.fundraiserRepository.sumOfRaised();
+	}
+
+	@Override
+	@Transactional
+	public Double sumOfRaiseGoal() {
+		return this.fundraiserRepository.sumOfRaiseGoal();
+	}
+
+	@Override
+	@Transactional
+	public Long totalFundraisers() {
+		return this.fundraiserRepository.count();
+	}
+
+	@Override
+	@Transactional
+	public Long totalActiveFundraisers() {
+		return this.fundraiserRepository.countAllByIsActive(true);
+	}
+
+	@Override
+	public List<FundraiserDto> findByIsReviewedFalse() {
+		return this.fundraiserToDto(this.fundraiserRepository.findByIsReviewedFalse());
 	}
 }

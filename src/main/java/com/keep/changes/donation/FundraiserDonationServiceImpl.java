@@ -56,6 +56,9 @@ public class FundraiserDonationServiceImpl implements FundraiserDonationService 
 		donation.setDonor(user);
 		donation.setFundraiser(fundraiser);
 
+//		add newly donated amount to raised
+		fundraiser.setRaised(fundraiser.getRaised() + donation.getDonationAmount());
+
 //		save to repository
 		FundraiserDonation savedDonation = this.donationRepository.save(donation);
 
@@ -157,6 +160,22 @@ public class FundraiserDonationServiceImpl implements FundraiserDonationService 
 			donationDtos.add(this.modelMapper.map(donation, FundraiserDonationDto.class));
 		}
 		return donationDtos;
+	}
+
+//	admin dashboard
+	@Override
+	public Long totalDonations() {
+		return this.donationRepository.count();
+	}
+
+	@Override
+	public Long totalDonors() {
+		return this.donationRepository.totalDonors();
+	}
+
+	@Override
+	public Long totalDonatedFundraisers() {
+		return this.donationRepository.totalDonatedFundraisers();
 	}
 
 }

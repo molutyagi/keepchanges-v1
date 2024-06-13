@@ -39,8 +39,10 @@ import com.keep.changes.user.token.TokenRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Autowired
@@ -165,14 +167,37 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 				String accessToken = this.jwtService.generateAccessToken(userDetails);
 				Map<String, String> accessTokenResponse = new HashMap<>();
-				accessTokenResponse.put("refreshToken", accessToken);
+				accessTokenResponse.put("accessToken", accessToken);
 
 				new ObjectMapper().writeValue(response.getOutputStream(), accessTokenResponse);
 			}
 		}
 	}
 
-//	private void setTokeToHttp(String token, int maxAge) {
+	@Override
+	public AuthenticationResponse resetPassword(AuthenticationRequest authRequest) {
+		User user = this.userRepository.findByEmail(authRequest.getUsername())
+				.orElseThrow(() -> new ResourceNotFoundException("User", "Username", authRequest.getUsername()));
+
+		user.setPassword(this.passwordEncoder.encode(authRequest.getPassword()));
+
+		this.userRepository.save(user);
+
+		UserDetails userDetails = this.userDetailsService.loadUserByUsername(authRequest.getUsername());
+
+		String accessToken = this.jwtService.generateAccessToken(userDetails);
+		String refreshToken = this.jwtService.generateRefreshToken(userDetails);
+
+		AuthenticationResponse response = new AuthenticationResponse();
+		response.setAccessToken(accessToken);
+		response.setRefreshToken(refreshToken);
+
+		System.out.println(response);
+		return response;
+
+	}
+
+//	private void setTokenToHttp(String token, int maxAge) {
 //		Cookie accessTokenCookie = new Cookie("accessToken", token);
 //		accessTokenCookie.setHttpOnly(true);
 //		accessTokenCookie.setSecure(true); // Set to true in production

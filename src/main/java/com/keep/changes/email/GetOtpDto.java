@@ -23,5 +23,8 @@ public class GetOtpDto {
 	@NotEmpty
 	@Pattern(regexp = "(0|91)?[6-9][0-9]{9}", message = "Invalid Number.")
 	private String phone;
+	
+	@NotEmpty
+	private String action;
 
 }

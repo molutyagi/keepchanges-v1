@@ -14,12 +14,15 @@ import org.springframework.stereotype.Service;
 import com.keep.changes.exception.ApiException;
 import com.keep.changes.exception.ResourceAlreadyExistsException;
 import com.keep.changes.exception.ResourceNotFoundException;
+import com.keep.changes.fundraiser.Fundraiser;
+import com.keep.changes.fundraiser.FundraiserRepository;
 import com.keep.changes.user.User;
 import com.keep.changes.user.UserRepository;
 
 import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class AccountServiceImpl implements AccountService {
 
 	@Autowired
@@ -31,9 +34,11 @@ public class AccountServiceImpl implements AccountService {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private FundraiserRepository fundraiserRepository;
+
 	// add
 	@Override
-	@Transactional
 	public AccountDto addAccount(AccountDto accountDto) {
 
 		Optional<Account> accountWithNumber = this.accountRepository.findByAccountNumber(accountDto.getAccountNumber());
@@ -58,7 +63,6 @@ public class AccountServiceImpl implements AccountService {
 //	update
 //	put
 	@Override
-	@Transactional
 	public AccountDto putUpdateAccount(Long aId, AccountDto ad) {
 
 		Account account = this.accountRepository.findById(aId)
@@ -75,7 +79,6 @@ public class AccountServiceImpl implements AccountService {
 
 //	patch
 	@Override
-	@Transactional
 	public AccountDto patchUpdateAccount(Long aId, AccountDto partialAccountDto) {
 
 		Account account = this.accountRepository.findById(aId)
@@ -106,7 +109,6 @@ public class AccountServiceImpl implements AccountService {
 
 //	delete
 	@Override
-	@Transactional
 	public void deleteAccount(Long aId) {
 
 		Account account = this.accountRepository.findById(aId)
@@ -118,7 +120,6 @@ public class AccountServiceImpl implements AccountService {
 //	get
 //	by Id
 	@Override
-	@Transactional
 	public AccountDto getAccountById(Long aId) {
 		Account account = this.accountRepository.findById(aId)
 				.orElseThrow(() -> new ResourceNotFoundException("Account", "Id", aId));
@@ -128,7 +129,6 @@ public class AccountServiceImpl implements AccountService {
 
 //	all
 	@Override
-	@Transactional
 	public List<AccountDto> getAllAccounts() {
 		List<Account> all = this.accountRepository.findAll();
 		List<AccountDto> accountDtos = new ArrayList<>();
@@ -141,7 +141,6 @@ public class AccountServiceImpl implements AccountService {
 
 //	by holder
 	@Override
-	@Transactional
 	public List<AccountDto> getAccountByHoldingEntity(Long uId) {
 
 		User user = this.userRepository.findById(uId)
@@ -155,6 +154,17 @@ public class AccountServiceImpl implements AccountService {
 			accountDtos.add(accountDto);
 		}
 		return accountDtos;
+	}
+
+	@Override
+	public AccountDto getFundraiserAccount(Long fId) {
+		Fundraiser fundraiser = this.fundraiserRepository.findById(fId)
+				.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id", fId));
+
+		Account account = this.accountRepository.findByAssociatedFundraisers(fundraiser)
+				.orElseThrow(() -> new ResourceNotFoundException("Account", "Fundraiser", fundraiser.getId()));
+
+		return this.modelMapper.map(account, AccountDto.class);
 	}
 
 //	by account number

@@ -24,24 +24,6 @@ public class CloudinaryFileServiceImpl implements FileService {
 	@Autowired
 	private ObjectMapper objectMapper;
 
-//	public String upload(MultipartFile image, String folder) throws IOException {
-//
-//		Map<?, ?> params = ObjectUtils.asMap("folder", folder);
-//
-//		try {
-//			Map<?, ?> imageData = this.cloudinary.uploader().upload(image.getBytes(), params);
-//			CloudinaryUploadResponse uploadResponse = objectMapper.convertValue(imageData,
-//					CloudinaryUploadResponse.class);
-//
-//			String publicId = uploadResponse.getPublicId();
-//
-//			return publicId.substring(publicId.lastIndexOf("/") + 1);
-//
-//		} catch (IOException e) {
-//			throw new IOException();
-//		}
-//	}
-
 	@Override
 	public String uploadImage(String path, MultipartFile file) throws IOException {
 		Map<?, ?> params = ObjectUtils.asMap("folder", path);
@@ -50,13 +32,23 @@ public class CloudinaryFileServiceImpl implements FileService {
 			Map<?, ?> imageData = this.cloudinary.uploader().upload(file.getBytes(), params);
 			CloudinaryUploadResponse uploadResponse = objectMapper.convertValue(imageData,
 					CloudinaryUploadResponse.class);
-
 			String imageUrl = uploadResponse.getUrl();
-
-			System.out.println(uploadResponse.getUrl());
-
 			return imageUrl.substring(imageUrl.indexOf("upload/") + 7);
+		} catch (IOException e) {
+			throw new IOException();
+		}
+	}
 
+	@Override
+	public String updateImage(String publicId, MultipartFile file) throws IOException {
+		Map<?, ?> params = ObjectUtils.asMap("public_id", publicId, "overwrite", true, "invalidate", true);
+
+		try {
+			Map<?, ?> imageData = this.cloudinary.uploader().upload(file.getBytes(), params);
+			CloudinaryUploadResponse uploadResponse = objectMapper.convertValue(imageData,
+					CloudinaryUploadResponse.class);
+			String imageUrl = uploadResponse.getUrl();
+			return imageUrl.substring(imageUrl.indexOf("upload/") + 7);
 		} catch (IOException e) {
 			throw new IOException();
 		}
@@ -73,6 +65,7 @@ public class CloudinaryFileServiceImpl implements FileService {
 
 		String public_id = fileName.substring(fileName.indexOf("/") + 1, fileName.indexOf("."));
 		System.out.println("PUBLIC_ID : " + public_id);
-		this.cloudinary.uploader().destroy(public_id, ObjectUtils.emptyMap());
+		Map<?, ?> destroy = this.cloudinary.uploader().destroy(public_id, ObjectUtils.emptyMap());
+		System.out.println(destroy);
 	}
 }

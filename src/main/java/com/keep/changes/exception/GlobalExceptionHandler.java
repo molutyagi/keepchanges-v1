@@ -26,6 +26,7 @@ import org.springframework.web.client.HttpClientErrorException.Unauthorized;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import com.keep.changes.payload.response.ApiResponse;
 
@@ -138,7 +139,7 @@ public class GlobalExceptionHandler {
 		}
 
 		if (exception instanceof MissingServletRequestPartException) {
-			System.out.println("yaha se ja rha h");
+			System.out.println("9 yaha se ja rha h");
 			String message = exception.getMessage();
 			ApiResponse apiResponse = new ApiResponse(message, false);
 			return new ResponseEntity<ApiResponse>(apiResponse, HttpStatus.BAD_REQUEST);
@@ -225,6 +226,12 @@ public class GlobalExceptionHandler {
 					ex.getRequiredType().getSimpleName());
 			ApiResponse response = new ApiResponse(msg, false);
 			return new ResponseEntity<ApiResponse>(response, HttpStatus.BAD_REQUEST);
+		}
+
+		if (exception instanceof NoResourceFoundException) {
+			System.out.println("20");
+			ApiResponse response = new ApiResponse(exception.getMessage(), false);
+			return new ResponseEntity<ApiResponse>(response, HttpStatus.NOT_FOUND);
 		}
 
 		System.out.println(" 0 ");

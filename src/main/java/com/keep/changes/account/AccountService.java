@@ -29,4 +29,6 @@ public interface AccountService {
 
 	AccountDto getAccountByAccountNumber(String accountNumber);
 
+	AccountDto getFundraiserAccount(Long fId);
+
 }

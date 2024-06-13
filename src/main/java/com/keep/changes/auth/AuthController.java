@@ -20,7 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/auth")
+@RequestMapping("auth")
 public class AuthController {
 
 	@Autowired
@@ -51,6 +51,12 @@ public class AuthController {
 	@PostMapping("refresh-token")
 	public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		this.authenticationService.refreshToken(request, response);
+	}
+
+	@PostMapping("reset-password")
+	public ResponseEntity<AuthenticationResponse> resetPassword(
+			@Valid @RequestBody AuthenticationRequest authenticationRequest) {
+		return ResponseEntity.ok(this.authenticationService.resetPassword(authenticationRequest));
 	}
 
 }

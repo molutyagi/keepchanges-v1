@@ -24,4 +24,10 @@ public interface FundraiserDonationService {
 
 	List<FundraiserDonationDto> getAllDonationsByDonor(Long dId);
 
+//	admin dashboard
+	Long totalDonations();
+	Long totalDonors();
+	Long totalDonatedFundraisers();
+
+
 }

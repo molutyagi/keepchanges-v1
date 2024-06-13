@@ -19,4 +19,6 @@ public interface AuthenticationService {
 
 	void refreshToken(HttpServletRequest request, HttpServletResponse response) throws StreamWriteException, DatabindException, IOException;
 
+	AuthenticationResponse resetPassword(AuthenticationRequest authRequest);
+
 }

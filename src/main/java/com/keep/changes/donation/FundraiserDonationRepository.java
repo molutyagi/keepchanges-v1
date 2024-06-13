@@ -3,6 +3,7 @@ package com.keep.changes.donation;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.keep.changes.fundraiser.Fundraiser;
@@ -14,4 +15,10 @@ public interface FundraiserDonationRepository extends JpaRepository<FundraiserDo
 	List<FundraiserDonation> findByFundraiser(Fundraiser fundraiser);
 
 	List<FundraiserDonation> findByDonor(User user);
+
+	@Query("SELECT COUNT(DISTINCT d.donor) FROM FundraiserDonation d")
+	Long totalDonors();
+	
+	@Query("SELECT COUNT(DISTINCT d.fundraiser) FROM FundraiserDonation d")
+	Long totalDonatedFundraisers();
 }

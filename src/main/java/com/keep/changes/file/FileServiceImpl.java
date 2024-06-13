@@ -51,4 +51,10 @@ public class FileServiceImpl implements FileService {
 		}
 
 	}
+
+	@Override
+	public String updateImage(String publicId, MultipartFile file) throws IOException {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

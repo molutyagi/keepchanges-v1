@@ -32,7 +32,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("api/accounts")
+@RequestMapping("accounts")
 @RequiredArgsConstructor
 public class AccountController {
 
@@ -122,6 +122,13 @@ public class AccountController {
 	public ResponseEntity<List<AccountDto>> getAccountByUser(@PathVariable Long uId) {
 
 		return ResponseEntity.ok(this.accountService.getAccountByHoldingEntity(uId));
+	}
+
+//	by associated fundraiser
+	@GetMapping(value = { "account/fundraiser_{fId}", "account/fundraiser_{fId}/" })
+	public ResponseEntity<AccountDto> getFundraiserAccount(@PathVariable Long fId) {
+
+		return ResponseEntity.ok(this.accountService.getFundraiserAccount(fId));
 	}
 
 //	by account number

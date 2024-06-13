@@ -47,7 +47,7 @@ public class Account {
 	private String holderName;
 
 	@ManyToOne
-	@JoinTable(name = "user_account", joinColumns = @JoinColumn(name = "user", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "account", referencedColumnName = "id"))
+	@JoinTable(name = "user_account", joinColumns = @JoinColumn(name = "account", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "user", referencedColumnName = "id"))
 	private User holdingEntity;
 
 	@OneToMany(mappedBy = "account")

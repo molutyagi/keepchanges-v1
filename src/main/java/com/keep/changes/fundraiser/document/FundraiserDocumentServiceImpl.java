@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.keep.changes.exception.ApiException;
 import com.keep.changes.exception.ResourceNotFoundException;
 import com.keep.changes.file.FileService;
+import com.keep.changes.fundraiser.AdminApproval;
 import com.keep.changes.fundraiser.Fundraiser;
 import com.keep.changes.fundraiser.FundraiserRepository;
 import jakarta.transaction.Transactional;
@@ -66,6 +67,11 @@ public class FundraiserDocumentServiceImpl implements FundraiserDocumentService 
 		for (FundraiserDocument document : savedAll) {
 			allDtos.add(this.modelMapper.map(document, FundraiserDocumentDto.class));
 		}
+
+		if (fundraiser.getApproval() == AdminApproval.PENDING) {
+			fundraiser.setIsReviewed(false);
+		}
+		this.fundraiserRepository.save(fundraiser);
 		return allDtos;
 	}
 

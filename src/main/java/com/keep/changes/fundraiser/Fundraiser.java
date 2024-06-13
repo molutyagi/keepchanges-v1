@@ -86,13 +86,15 @@ public class Fundraiser {
 	@Column(columnDefinition = "varchar(100)")
 	private String displayPhoto;
 
-	private boolean isActive = false;
+	private Boolean isActive = false;
 
 	@Enumerated(EnumType.STRING)
 	private AdminApproval approval;
 
 	@Column(columnDefinition = "longtext")
 	private String adminRemarks;
+
+	private Boolean isReviewed = false;
 
 	@Enumerated(EnumType.STRING)
 	private FundraiserStatus status;
@@ -105,9 +107,6 @@ public class Fundraiser {
 
 	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<Photo> photos = new HashSet<>();
-	
-	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private Set<FundraiserDocument> documents = new HashSet<>();
 
 	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<FundraiserDocument> documents = new HashSet<>();

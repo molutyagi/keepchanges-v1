@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum FundraiserStatus {
-	ACTIVE("Active"), COMPLETED("Completed"), CANCELLED("Cancelled"), INACTIVE("Inactive");
+	ACTIVE("Active"), OPEN("Open"), COMPLETED("Completed"), CANCELLED("Cancelled"), INACTIVE("Inactive"),
+	CLOSED("Closed");
 
 	private final String status;
 }

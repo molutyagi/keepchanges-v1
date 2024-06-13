@@ -16,7 +16,7 @@ import com.keep.changes.payload.response.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/admin/fundraisers")
+@RequestMapping("admin/fundraisers")
 public class AdminFundraiserController {
 
 	@Autowired
@@ -25,7 +25,8 @@ public class AdminFundraiserController {
 	@PatchMapping(value = { "fundraiser_{fId}", "fundraiser_{fId}/" })
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> fundraiserAdminController(@Valid @PathVariable Long fId,
-			@RequestParam("adminRemarks") String adminRemarks, @RequestParam("adminStatus") AdminApproval adminStatus) {
+			@RequestParam(value = "adminRemarks", required = false) String adminRemarks,
+			@RequestParam(value = "adminStatus", required = false) AdminApproval adminStatus) {
 
 		try {
 			this.fundraiserService.fundraiserAdminService(fId, adminRemarks, adminStatus);

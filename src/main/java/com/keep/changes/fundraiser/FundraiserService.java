@@ -26,6 +26,10 @@ public interface FundraiserService {
 
 	List<FundraiserDto> getAllFundraisers();
 
+	List<FundraiserDto> getAllActiveFundraisers();
+
+	List<FundraiserDto> getLatestFundraiser();
+
 	List<FundraiserDto> getFundraiserByEmail(String email);
 
 	List<FundraiserDto> getFundraiserByPhone(String phone);
@@ -36,6 +40,21 @@ public interface FundraiserService {
 
 	List<FundraiserDto> getFundraisersByPoster(String username);
 
+	List<FundraiserDto> getFundraisersByPosterId(Long pId);
+
+	List<FundraiserDto> getActiveFundraisersByPosterId(@Valid Long pId);
+
 	void fundraiserAdminService(@Valid Long fId, String adminRemarks, AdminApproval adminStatus);
+
+//	admin dashboard
+	Double sumOfRaised();
+
+	Double sumOfRaiseGoal();
+
+	Long totalFundraisers();
+
+	Long totalActiveFundraisers();
+
+	List<FundraiserDto> findByIsReviewedFalse();
 
 }
