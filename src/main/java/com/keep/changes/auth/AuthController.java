@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.keep.changes.exception.ApiException;
+import com.keep.changes.payload.response.ApiResponse;
 import com.keep.changes.user.UserDto;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -54,9 +55,8 @@ public class AuthController {
 	}
 
 	@PostMapping("reset-password")
-	public ResponseEntity<AuthenticationResponse> resetPassword(
-			@Valid @RequestBody AuthenticationRequest authenticationRequest) {
-		return ResponseEntity.ok(this.authenticationService.resetPassword(authenticationRequest));
+	public ResponseEntity<ApiResponse> resetPassword(@Valid @RequestBody AuthenticationRequest authenticationRequest) {
+		return ResponseEntity.ok(new ApiResponse("Password changed successfully.", true));
 	}
 
 }

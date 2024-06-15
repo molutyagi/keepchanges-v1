@@ -6,9 +6,10 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.5</version>
+		<version>3.2.6</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
+
 	<groupId>com.blog.app</groupId>
 	<artifactId>keepchanges-v1</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -97,9 +98,30 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+		<!-- Production Ready Dasboard -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-core -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-core</artifactId>
+		</dependency>
+
+		<!--
+		https://mvnrepository.com/artifact/io.micrometer/micrometer-tracing-bridge-brave -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+
+		<!--
+		https://mvnrepository.com/artifact/io.zipkin.reporter2/zipkin-reporter-brave -->
+		<dependency>
+			<groupId>io.zipkin.reporter2</groupId>
+			<artifactId>zipkin-reporter-brave</artifactId>
 		</dependency>
 
 		<dependency>

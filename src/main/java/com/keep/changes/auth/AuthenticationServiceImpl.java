@@ -175,26 +175,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	}
 
 	@Override
-	public AuthenticationResponse resetPassword(AuthenticationRequest authRequest) {
+	public void resetPassword(AuthenticationRequest authRequest) {
 		User user = this.userRepository.findByEmail(authRequest.getUsername())
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Username", authRequest.getUsername()));
-
 		user.setPassword(this.passwordEncoder.encode(authRequest.getPassword()));
-
 		this.userRepository.save(user);
-
-		UserDetails userDetails = this.userDetailsService.loadUserByUsername(authRequest.getUsername());
-
-		String accessToken = this.jwtService.generateAccessToken(userDetails);
-		String refreshToken = this.jwtService.generateRefreshToken(userDetails);
-
-		AuthenticationResponse response = new AuthenticationResponse();
-		response.setAccessToken(accessToken);
-		response.setRefreshToken(refreshToken);
-
-		System.out.println(response);
-		return response;
-
 	}
 
 //	private void setTokenToHttp(String token, int maxAge) {
