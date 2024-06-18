@@ -14,6 +14,7 @@ import com.keep.changes.category.Category;
 import com.keep.changes.donation.FundraiserDonation;
 import com.keep.changes.fundraiser.document.FundraiserDocument;
 import com.keep.changes.fundraiser.photo.Photo;
+import com.keep.changes.transaction.Transaction;
 import com.keep.changes.user.User;
 
 import jakarta.persistence.CascadeType;
@@ -33,16 +34,10 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Email;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
 @EntityListeners(FundraiserEntityListener.class)
 public class Fundraiser {
 
@@ -122,6 +117,9 @@ public class Fundraiser {
 	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //	@JoinTable(name = "fundraiser_account", joinColumns = @JoinColumn(name = "fundraiser", referencedColumnName = "id"), inverseJoinColumns = @JoinColumn(name = "account", referencedColumnName = "id"))
 	private Account account;
+
+	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private Set<Transaction> transactions = new HashSet<>();
 
 	@OneToMany(mappedBy = "fundraiser", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private Set<FundraiserDonation> donations = new HashSet<>();

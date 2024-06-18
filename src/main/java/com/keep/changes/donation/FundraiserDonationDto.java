@@ -19,13 +19,19 @@ public class FundraiserDonationDto {
 	private Long id;
 
 	private Double donationAmount;
-	
+
 	private String transactionId;
 
 	private Date donationDate;
+	
+	private Long donorId;
 
-	private UserDto donor;
+	private String donorName;
 
-	private FundraiserDto fundraiser;
+	private Long fundraiserId;
+
+	private String fundraiserTitle;
+
+	private String fundraiserDisplayPhoto;
 
 }

@@ -174,22 +174,23 @@ public class FundraiserController {
 			}
 		}
 
-		Set<ConstraintViolation<FundraiserDto>> violations = validator.validate(fundraiserDto);
-		if (!violations.isEmpty()) {
-			throw new ConstraintViolationException(violations);
-		}
+//		Set<ConstraintViolation<FundraiserDto>> violations = validator.validate(fundraiserDto);
+//		if (!violations.isEmpty()) {
+//			throw new ConstraintViolationException(violations);
+//		}
 
 		// save and set display image
-		if (this.verifyImage(displayImage)) {
-			try {
-				displayImageName = this.fileService.uploadImage(displayImagePath, displayImage);
-				fundraiserDto.setDisplayPhoto(displayImageName);
-			} catch (IOException e) {
-				throw new ApiException("OOPS!! Something went wrong. Could not create fundraiser.",
-						HttpStatus.BAD_REQUEST, false);
+		if (displayImage != null) {
+			if (this.verifyImage(displayImage)) {
+				try {
+					displayImageName = this.fileService.uploadImage(displayImagePath, displayImage);
+					fundraiserDto.setDisplayPhoto(displayImageName);
+				} catch (IOException e) {
+					throw new ApiException("OOPS!! Something went wrong. Could not create fundraiser.",
+							HttpStatus.BAD_REQUEST, false);
+				}
 			}
 		}
-
 		// get category
 		if (categoryId != null) {
 			CategoryDto categoryDto = this.categoryService.getById(categoryId);

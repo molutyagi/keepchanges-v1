@@ -34,7 +34,7 @@ public class SecurityConfig {
 
 	private static final String[] ADMIN_ONLY_URLS = { "admin/**", "categories/**" };
 
-	private static final String[] PUBLIC_URLS = { "/v3/api-docs", "/v2/api-docs", "auth/**", "/swagger-resources/**",
+	private static final String[] PUBLIC_URLS = {"/v3/api-docs", "/v2/api-docs", "auth/**", "/transactions/**",  "/swagger-resources/**",
 			"/swagger-ui/**", "/webjars/**", "cloudinary/**" };
 
 	@Autowired
