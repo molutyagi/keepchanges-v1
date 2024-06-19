@@ -19,9 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.keep.changes.exception.ApiException;
 import com.keep.changes.payload.response.ApiResponse;
-import com.keep.changes.user.UserDto;
-
-//import com.keep.changes.fundraiser.FundraiserService;
 
 import jakarta.validation.Valid;
 
@@ -97,9 +94,9 @@ public class FundraiserDonationController {
 	public boolean authenticateUser(Long donationId, Long loggedInUserId, Boolean isAdmin)
 			throws AccessDeniedException {
 
-		UserDto donor = this.donationService.getDonationById(donationId).getDonor();
+		Long donorId = this.donationService.getDonationById(donationId).getDonorId();
 
-		if (donor.getId() == loggedInUserId || isAdmin) {
+		if (donorId == loggedInUserId || isAdmin) {
 			return true;
 		}
 		throw new ApiException("You are not authorized to perform this action.", HttpStatus.FORBIDDEN, false);

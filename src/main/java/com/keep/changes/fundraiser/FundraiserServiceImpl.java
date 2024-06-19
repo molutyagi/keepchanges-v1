@@ -64,6 +64,7 @@ public class FundraiserServiceImpl implements FundraiserService {
 
 		Fundraiser fundraiser = this.modelMapper.map(fundraiserDto, Fundraiser.class);
 		fundraiser.setPostedBy(user);
+		fundraiser.setRaised(0.0);
 
 		if (authentication.getAuthorities().stream().anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"))) {
 			fundraiser.setIsActive(true);
@@ -77,6 +78,8 @@ public class FundraiserServiceImpl implements FundraiserService {
 			fundraiser.setApproval(AdminApproval.PENDING);
 			fundraiser.setIsReviewed(false);
 		}
+		
+		System.out.println(fundraiser);
 
 		Fundraiser saved = this.fundraiserRepository.save(fundraiser);
 

@@ -24,7 +24,7 @@ public class JwtService {
 
 //	@Value("${JWT_TOKEN_VALIDITY}")
 	private long JWT_TOKEN_VALIDITY = 5 * 60 * 1000;
-	private long REFRESH_TOKEN_VALIDITY = 50 * 60 * 1000;
+	private long REFRESH_TOKEN_VALIDITY = 60L * 24L * 60L * 60L * 1000L;
 
 //	Check if given user is valid
 	public boolean isValid(String token, UserDetails user) {

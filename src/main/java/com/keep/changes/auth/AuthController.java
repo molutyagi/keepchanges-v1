@@ -56,6 +56,7 @@ public class AuthController {
 
 	@PostMapping("reset-password")
 	public ResponseEntity<ApiResponse> resetPassword(@Valid @RequestBody AuthenticationRequest authenticationRequest) {
+		this.authenticationService.resetPassword(authenticationRequest);
 		return ResponseEntity.ok(new ApiResponse("Password changed successfully.", true));
 	}
 

@@ -39,12 +39,16 @@ public class EmailServiceImpl implements EmailService {
 	@Override
 	public void sendEmail(String to, String username, EmailTemplateName emailTemplate, String subject) {
 
+		System.out.println("in service impl");
+
 		String templateName;
 		if (emailTemplate == null) {
-			templateName = "confirm-email";
+			templateName = EmailTemplateName.CONFIRM_EMAIL.getName();
 		} else {
 			templateName = emailTemplate.getName();
 		}
+
+		System.out.println("template : " + templateName);
 
 		String activationCode = this.tokenService.generateAndSaveActivationToken(to);
 
@@ -68,11 +72,12 @@ public class EmailServiceImpl implements EmailService {
 			String template = this.templateEngine.process(templateName, context);
 			messageHelper.setText(template, true);
 
+			System.out.println("before sending");
 			this.mailSender.send(mimeMessage);
+			System.out.println("sent");
 
 		} catch (MessagingException e) {
 			throw new ApiException("Could not sent otp to mail. Try again.", HttpStatus.BAD_REQUEST, false);
 		}
-
 	}
 }
