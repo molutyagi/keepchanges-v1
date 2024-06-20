@@ -40,8 +40,6 @@ import com.keep.changes.fundraiser.document.FundraiserDocumentService;
 import com.keep.changes.fundraiser.photo.FundraiserPhotoService;
 import com.keep.changes.fundraiser.photo.PhotoDto;
 import com.keep.changes.payload.response.ApiResponse;
-import com.keep.changes.user.UserDto;
-
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -279,96 +277,119 @@ public class FundraiserController {
 	}
 
 	// -------------------------Fundraiser Get Controllers-------------------------
+
 	// By Id
 	@GetMapping(value = { "fundraiser_{fId}", "fundraiser_{fId}/", "fundraiser/{fId}", "fundraiser/{fId}/" })
-	public ResponseEntity<FundraiserDto> getById(@PathVariable long fId) {
+	public ResponseEntity<FundraiserDetailsResponse> getById(@PathVariable long fId) {
 
-		return ResponseEntity.ok(this.fundraiserService.getFundraiserById(fId));
-	}
-
-	// Get Latest fundraisers
-	@GetMapping(value = { "latest", "latest/", "getall/latest", "getall/latest/" })
-	public ResponseEntity<List<FundraiserDto>> getLatestFive() {
-		System.out.println("controller");
-		return ResponseEntity.ok(this.fundraiserService.getLatestFundraiser());
+		return ResponseEntity.ok(this.fundraiserService.getFundraiserById1(fId));
 	}
 
 	// Get All Active
 	@GetMapping(value = { "active", "active/", "getall/active", "getall/active/" })
-	public ResponseEntity<List<FundraiserDto>> getAllActive() {
-		return ResponseEntity.ok(this.fundraiserService.getAllActiveFundraisers());
+	public ResponseEntity<FundraiserCardResponse> getAllActive(@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
+		return ResponseEntity.ok(this.fundraiserService.getAllActiveFundraisers(pageNumber, pageSize));
 	}
 
 	// Get All
 	@GetMapping(value = { "", "/", "getall", "getall/" })
-	public ResponseEntity<List<FundraiserDto>> getAll() {
-		return ResponseEntity.ok(this.fundraiserService.getAllFundraisers());
+	public ResponseEntity<FundraiserCardResponse> getAll(@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
+		return ResponseEntity.ok(this.fundraiserService.getAllFundraisers(pageNumber, pageSize));
+	}
+
+	// get 100 by pagination
+	// Get All Active
+	@GetMapping(value = { "active100", "active100/", "getall/active100", "getall/active100/" })
+	public ResponseEntity<FundraiserCardResponse> getActive(@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
+
+		return ResponseEntity.ok(this.fundraiserService.getActive100Fundraisers(pageNumber, pageSize));
+	}
+
+	// Get Latest fundraisers
+	@GetMapping(value = { "latest", "latest/", "getall/latest", "getall/latest/" })
+	public ResponseEntity<FundraiserCardResponse> getLatestFive() {
+		System.out.println("controller");
+		return ResponseEntity.ok(this.fundraiserService.getLatestFundraiser());
 	}
 
 	// Get By Email
 	@GetMapping(value = { "email/{email}", "email/{email}/", "getall/email/{email}", "getall/email/{email}/" })
-	public ResponseEntity<List<FundraiserDto>> getByEmail(@Valid @PathVariable String email) {
-		return ResponseEntity.ok(this.fundraiserService.getFundraiserByEmail(email));
+	public ResponseEntity<FundraiserCardResponse> getByEmail(@Valid @PathVariable String email,
+			@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
+		return ResponseEntity.ok(this.fundraiserService.getFundraiserByEmail(email, pageNumber, pageSize));
 	}
 
 	// Get By Phone
 	@GetMapping(value = { "phone/{phone}", "phone/{phone}/", "getall/phone/{phone}", "getall/phone/{phone}/" })
-	public ResponseEntity<List<FundraiserDto>> getByPhone(@Valid @PathVariable String phone) {
+	public ResponseEntity<FundraiserCardResponse> getByPhone(@Valid @PathVariable String phone,
+			@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
 
-		return ResponseEntity.ok(this.fundraiserService.getFundraiserByPhone(phone));
+		return ResponseEntity.ok(this.fundraiserService.getFundraiserByPhone(phone, pageNumber, pageSize));
 	}
 
 	// Get By Title
 	@GetMapping(value = { "title/{title}", "title/{title}/", "getall/title/{title}", "getall/title/{title}/" })
-	public ResponseEntity<List<FundraiserDto>> getByTitle(@Valid @PathVariable String title) {
+	public ResponseEntity<FundraiserCardResponse> getByTitle(@Valid @PathVariable String title,
+			@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
 
-		return ResponseEntity.ok(this.fundraiserService.getFundraisersByTitle(title));
+		return ResponseEntity.ok(this.fundraiserService.getFundraisersByTitle(title, pageNumber, pageSize));
 	}
 
 	// Get By Poster(s) Email containing
 	@GetMapping(value = { "postedby/{username}", "postedby/{username}/", "getall/postedby/{username}",
 			"getall/postedby/{username}/" })
-	public ResponseEntity<List<FundraiserDto>> getByPoster(@Valid @PathVariable String username) {
+	public ResponseEntity<FundraiserCardResponse> getByPoster(@Valid @PathVariable String username,
+			@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
 
-		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPoster(username));
+		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPoster(username, pageNumber, pageSize));
 	}
 
 //	Get By Poster Id
 	@GetMapping(value = { "poster/{pId}", "poster/{pId}/", "getall/poster/{pId}", "getall/poster/{pId}/" })
-	public ResponseEntity<List<FundraiserDto>> getByPosterId(@Valid @PathVariable Long pId) {
+	public ResponseEntity<FundraiserCardResponse> getByPosterId(@Valid @PathVariable Long pId,
+			@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
 
-		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPosterId(pId));
+		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPosterId(pId, pageNumber, pageSize));
 	}
 
 //	get user's active fundraisers
 	@GetMapping(value = { "poster/{pId}/active", "poster/{pId}/active", "getall/poster/{pId}/active",
 			"getall/poster/{pId}/active/" })
-	public ResponseEntity<List<FundraiserDto>> getActiveByPosterId(@Valid @PathVariable Long pId) {
+	public ResponseEntity<FundraiserCardResponse> getActiveByPosterId(@Valid @PathVariable Long pId,
+			@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
 
-		return ResponseEntity.ok(this.fundraiserService.getActiveFundraisersByPosterId(pId));
+		return ResponseEntity.ok(this.fundraiserService.getActiveFundraisersByPosterId(pId, pageNumber, pageSize));
 	}
 
 	// Get By Category
 	@GetMapping(value = { "category/{categoryId}", "category/{categoryId}/", "getall/category/{categoryId}",
 			"getall/category/{categoryId}/" })
-	public ResponseEntity<List<FundraiserDto>> getByCategory(@Valid @PathVariable Long categoryId) {
+	public ResponseEntity<FundraiserCardResponse> getByCategory(@Valid @PathVariable Long categoryId,
+			@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
 
-		return ResponseEntity.ok(this.fundraiserService.getFundraisersByCategory(categoryId));
+		return ResponseEntity.ok(this.fundraiserService.getFundraisersByCategory(categoryId, pageNumber, pageSize));
 	}
 
 	// Get By Multiple Categories
 	@GetMapping(value = { "category/", "category/", "getall/category", "getall/category/" })
-	public ResponseEntity<List<FundraiserDto>> getByMultpleCategories(
-			@Valid @RequestParam("categoryIds") Long categoryIds[]) {
-		List<FundraiserDto> fundraisersDto = new ArrayList<FundraiserDto>();
+	public ResponseEntity<FundraiserCardResponse> getByMultpleCategories(
+			@Valid @RequestParam("categoryIds") Long categoryIds[],
+			@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
 
-		for (Long categoryId : categoryIds) {
-			List<FundraiserDto> fundraisersByCategory = this.fundraiserService.getFundraisersByCategory(categoryId);
-			if (!fundraisersByCategory.isEmpty()) {
-				fundraisersDto.addAll(fundraisersByCategory);
-			}
-		}
-		return ResponseEntity.ok(fundraisersDto);
+		System.out.println(categoryIds);
+
+		return ResponseEntity.ok(this.fundraiserService.getFundraisersByCategories(categoryIds, pageNumber, pageSize));
 	}
 
 	// --------------------- Fundraiser Account Controllers ---------------------
@@ -652,8 +673,8 @@ public class FundraiserController {
 	// authenticate user
 	public boolean authenticateUser(Long fId, Long cUId, Boolean isAdmin) throws AccessDeniedException {
 
-		UserDto postedBy = this.fundraiserService.getFundraiserById(fId).getPostedBy();
-		if (postedBy.getId() == cUId || isAdmin) {
+		Long postedById = this.fundraiserService.getFundraiserById1(fId).getPostedById();
+		if (postedById == cUId || isAdmin) {
 			return true;
 		}
 		throw new ApiException("You are not authorized to perform this action.", HttpStatus.FORBIDDEN, false);

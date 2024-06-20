@@ -29,7 +29,7 @@ public class Category {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(columnDefinition = "varchar(30)", nullable = false, unique = true)
+	@Column(columnDefinition = "varchar(100)", nullable = false, unique = true)
 	private String categoryName;
 
 	@Column(columnDefinition = "longText", nullable = false)

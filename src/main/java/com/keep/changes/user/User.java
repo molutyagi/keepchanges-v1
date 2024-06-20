@@ -51,17 +51,17 @@ public class User implements UserDetails {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(columnDefinition = "varchar(40)", nullable = false)
+	@Column(columnDefinition = "varchar(100)", nullable = false)
 	private String name;
 
 	@Email
-	@Column(columnDefinition = "varchar(30)", nullable = false, unique = true)
+	@Column(columnDefinition = "varchar(100)", nullable = false, unique = true)
 	private String email;
 
 	@Column(columnDefinition = "varchar(100)", nullable = false)
 	private String password;
 
-	@Column(columnDefinition = "varchar(13)", nullable = false, unique = true)
+	@Column(columnDefinition = "varchar(50)", nullable = false, unique = true)
 	private String phone;
 
 	@Column(columnDefinition = "varchar(100)")

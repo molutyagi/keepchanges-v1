@@ -7,12 +7,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.cloudinary.Cloudinary;
+import com.github.javafaker.Faker;
 
 @Configuration
 public class ProjectConfig {
 
 	@Bean
-	public Cloudinary getCloudinary() {
+	Cloudinary getCloudinary() {
 		Map<Object, Object> config = new HashMap<>();
 
 		config.put("cloud_name", "didpgi5h3");
@@ -21,6 +22,11 @@ public class ProjectConfig {
 		config.put("secure", true);
 
 		return new Cloudinary(config);
+	}
+
+	@Bean
+	Faker faker() {
+		return new Faker();
 	}
 
 }

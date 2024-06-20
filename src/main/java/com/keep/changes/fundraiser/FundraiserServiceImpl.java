@@ -8,6 +8,9 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -78,8 +81,6 @@ public class FundraiserServiceImpl implements FundraiserService {
 			fundraiser.setApproval(AdminApproval.PENDING);
 			fundraiser.setIsReviewed(false);
 		}
-		
-		System.out.println(fundraiser);
 
 		Fundraiser saved = this.fundraiserRepository.save(fundraiser);
 
@@ -188,21 +189,6 @@ public class FundraiserServiceImpl implements FundraiserService {
 	}
 
 //	get
-	@Override
-	@Transactional
-	public List<FundraiserDto> getLatestFundraiser() {
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findLatestFundraisers();
-		System.out.println("service impl");
-		return this.fundraiserToDto(fundraisers);
-	}
-
-	@Override
-	@Transactional
-	public List<FundraiserDto> getAllActiveFundraisers() {
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findAllActiveFundraisers();
-		return this.fundraiserToDto(fundraisers);
-	}
-
 //	by id
 	@Override
 	@Transactional
@@ -212,131 +198,180 @@ public class FundraiserServiceImpl implements FundraiserService {
 		return this.modelMapper.map(fundraiser, FundraiserDto.class);
 	}
 
+//	by id
+	@Override
+	@Transactional
+	public FundraiserDetailsResponse getFundraiserById1(Long fId) {
+		Fundraiser fundraiser = this.fundraiserRepository.findById(fId)
+				.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id", fId));
+		return this.modelMapper.map(fundraiser, FundraiserDetailsResponse.class);
+	}
+
 //	get all
 	@Override
 	@Transactional
-	public List<FundraiserDto> getAllFundraisers() {
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findAll();
+	public FundraiserCardResponse getAllFundraisers(Integer pageNumber, Integer pageSize) {
 
-		return fundraiserToDto(fundraisers);
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
+		Page<Fundraiser> page = this.fundraiserRepository.findAll(pageable);
+
+		return this.pageFundraiserToDto(page);
+	}
+
+//	get all active
+	@Override
+	@Transactional
+	public FundraiserCardResponse getAllActiveFundraisers(Integer pageNumber, Integer pageSize) {
+
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrue(pageable);
+
+		return this.pageFundraiserToDto(page);
+	}
+
+//	get active 100
+	@Override
+	@Transactional
+	public FundraiserCardResponse getActive100Fundraisers(Integer pageNumber, Integer pageSize) {
+
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrue(pageable);
+
+		return this.pageFundraiserToDto(page);
+	}
+
+//	get latest 6
+	@Override
+	@Transactional
+	public FundraiserCardResponse getLatestFundraiser() {
+		List<Fundraiser> fundraisers = this.fundraiserRepository.findTop6ByIsActiveTrueOrderByIdDesc();
+		System.out.println("service impl");
+		return this.fundraiserToResponseDto(fundraisers);
 	}
 
 //	by email
 	@Override
 	@Transactional
-	public List<FundraiserDto> getFundraiserByEmail(String email) {
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findByEmail(email);
+	public FundraiserCardResponse getFundraiserByEmail(String email, Integer pageNumber, Integer pageSize) {
 
-		return fundraiserToDto(fundraisers);
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrueAndEmailContaining(email, pageable);
+
+		return this.pageFundraiserToDto(page);
 	}
 
 //	by phone
 	@Override
 	@Transactional
-	public List<FundraiserDto> getFundraiserByPhone(String phone) {
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findByPhone(phone);
+	public FundraiserCardResponse getFundraiserByPhone(String phone, Integer pageNumber, Integer pageSize) {
 
-		return fundraiserToDto(fundraisers);
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrueAndPhoneContaining(phone, pageable);
+
+		return this.pageFundraiserToDto(page);
 	}
 
 //	by title containing
 	@Override
 	@Transactional
-	public List<FundraiserDto> getFundraisersByTitle(String title) {
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findByFundraiserTitleContaining(title);
+	public FundraiserCardResponse getFundraisersByTitle(String title, Integer pageNumber, Integer pageSize) {
 
-		return fundraiserToDto(fundraisers);
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrueAndFundraiserTitleContaining(title,
+				pageable);
+
+		return this.pageFundraiserToDto(page);
 	}
 
 //	by category
 	@Override
 	@Transactional
-	public List<FundraiserDto> getFundraisersByCategory(Long categoryId) {
+	public FundraiserCardResponse getFundraisersByCategory(Long categoryId, Integer pageNumber, Integer pageSize) {
 
 		Category category = this.categoryRepository.findById(categoryId)
 				.orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
 
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findByCategory(category);
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-		return fundraiserToDto(fundraisers);
+		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrueAndCategory(category, pageable);
+
+		return this.pageFundraiserToDto(page);
 	}
 
-//	by poster
+//	by multiple categories
 	@Override
 	@Transactional
-	public List<FundraiserDto> getFundraisersByPoster(String username) {
+	public FundraiserCardResponse getFundraisersByCategories(Long categoryIds[], Integer pageNumber, Integer pageSize) {
+
+		List<Category> categories = new ArrayList<>();
+
+		for (Long categoryId : categoryIds) {
+
+			Category category = this.categoryRepository.findById(categoryId)
+					.orElseThrow(() -> new ResourceNotFoundException("Category", "Id", categoryId));
+			categories.add(category);
+		}
+
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrueAndCategoryIn(categories, pageable);
+
+		return this.pageFundraiserToDto(page);
+	}
+
+//	by poster name
+	@Override
+	@Transactional
+	public FundraiserCardResponse getFundraisersByPoster(String username, Integer pageNumber, Integer pageSize) {
+
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
 		List<User> users = this.userRepository.findByNameContaining(username)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Username", username));
 
-		List<Fundraiser> fundraisers = new ArrayList<>();
-		for (User user : users) {
+		System.out.println(users.size());
 
-			List<Fundraiser> fundraisersByUser = this.fundraiserRepository.findByPostedBy(user);
+		Page<Fundraiser> fundraisers = this.fundraiserRepository.findAllByIsActiveTrueAndPostedByIn(users, pageable);
 
-			fundraisers.addAll(fundraisersByUser);
-		}
+		return this.pageFundraiserToDto(fundraisers);
 
-		return fundraiserToDto(fundraisers);
 	}
 
+//	get all by poster id
 	@Override
 	@Transactional
-	public List<FundraiserDto> getFundraisersByPosterId(Long pId) {
+	public FundraiserCardResponse getFundraisersByPosterId(Long pId, Integer pageNumber, Integer pageSize) {
 		User user = this.userRepository.findById(pId)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Id", pId));
 
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findByPostedBy(user);
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-		return fundraiserToDto(fundraisers);
+		Page<Fundraiser> page = this.fundraiserRepository.findByPostedBy(user, pageable);
+
+		return this.pageFundraiserToDto(page);
 	}
 
+//	get active by poster id
 	@Override
 	@Transactional
-	public List<FundraiserDto> getActiveFundraisersByPosterId(Long pId) {
+	public FundraiserCardResponse getActiveFundraisersByPosterId(Long pId, Integer pageNumber, Integer pageSize) {
 		User user = this.userRepository.findById(pId)
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Id", pId));
 
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findActiveByPostedBy(user);
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
 
-		return fundraiserToDto(fundraisers);
+		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrueAndPostedBy(user, pageable);
+
+		return this.pageFundraiserToDto(page);
 	}
 
-	private List<FundraiserDto> fundraiserToDto(List<Fundraiser> fundraisers) {
-
-		List<FundraiserDto> fundraiserDtos = new ArrayList<FundraiserDto>();
-		for (Fundraiser fundraiser : fundraisers) {
-			fundraiserDtos.add(this.modelMapper.map(fundraiser, FundraiserDto.class));
-		}
-
-		return fundraiserDtos;
-	}
-
-//	delete if previous display exists
-	private boolean hasPreviousDisplay(Fundraiser fundraiser) {
-
-		boolean isDeleted = false;
-
-		if (fundraiser.getDisplayPhoto() != null && !fundraiser.getDisplayPhoto().equals("")
-				&& !fundraiser.getDisplayPhoto().equals(this.DEFAULT_DISPLAY_IMAGE)) {
-
-			try {
-				this.fileService.deleteFile(displayImagePath, fundraiser.getDisplayPhoto());
-				isDeleted = true;
-			} catch (IOException e) {
-				throw new ApiException("OOPS!! Something went wrong. Could not update display image.",
-						HttpStatus.BAD_REQUEST, false);
-			}
-
-			if (isDeleted == false) {
-				throw new ApiException("OOPS!! Something went wrong. Could not update display image.",
-						HttpStatus.BAD_REQUEST, false);
-			}
-		}
-		return isDeleted;
-	}
-
+	// ----------------- ADMIN SERVICES --------------- //
 	@Override
 	@Transactional
 	public void fundraiserAdminService(@Valid Long fId, String adminRemarks, AdminApproval adminStatus) {
@@ -369,7 +404,7 @@ public class FundraiserServiceImpl implements FundraiserService {
 	@Override
 	@Transactional
 	public Double sumOfRaised() {
-		return this.fundraiserRepository.sumOfRaised();
+		return this.fundraiserRepository.sumRaisedByIsActive();
 	}
 
 	@Override
@@ -391,7 +426,85 @@ public class FundraiserServiceImpl implements FundraiserService {
 	}
 
 	@Override
-	public List<FundraiserDto> findByIsReviewedFalse() {
-		return this.fundraiserToDto(this.fundraiserRepository.findByIsReviewedFalse());
+	@Transactional
+	public FundraiserCardResponse findByIsReviewedFalse(Integer pageNumber, Integer pageSize) {
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		Page<Fundraiser> page = this.fundraiserRepository.findByIsReviewedFalse(pageable);
+
+		return this.pageFundraiserToDto(page);
+	}
+//	Private methods
+
+	private List<FundraiserDto> fundraiserToDto(List<Fundraiser> fundraisers) {
+
+		List<FundraiserDto> fundraiserDtos = new ArrayList<FundraiserDto>();
+		for (Fundraiser fundraiser : fundraisers) {
+			fundraiserDtos.add(this.modelMapper.map(fundraiser, FundraiserDto.class));
+		}
+
+		return fundraiserDtos;
+	}
+
+	private FundraiserCardResponse fundraiserToResponseDto(List<Fundraiser> fundraisers) {
+
+		List<FundraiserCardDto> fundraiserDtos = new ArrayList<FundraiserCardDto>();
+		for (Fundraiser fundraiser : fundraisers) {
+			fundraiserDtos.add(this.modelMapper.map(fundraiser, FundraiserCardDto.class));
+		}
+
+		FundraiserCardResponse cardResponse = new FundraiserCardResponse();
+		cardResponse.setFundraisers(fundraiserDtos);
+		cardResponse.setPageNo(0);
+		cardResponse.setPageSize(100);
+		cardResponse.setTotalElements(fundraisers.size());
+		cardResponse.setTotalPages(fundraisers.size() / 100);
+		cardResponse.setLastPage(false);
+
+		return cardResponse;
+	}
+
+	private FundraiserCardResponse pageFundraiserToDto(Page<Fundraiser> fundraisers) {
+
+//		List<Fundraiser> content = fundraisers.getContent();
+
+		List<FundraiserCardDto> fundraiserDtos = new ArrayList<FundraiserCardDto>();
+		for (Fundraiser fundraiser : fundraisers) {
+			fundraiserDtos.add(this.modelMapper.map(fundraiser, FundraiserCardDto.class));
+		}
+
+		FundraiserCardResponse cardResponse = new FundraiserCardResponse();
+		cardResponse.setFundraisers(fundraiserDtos);
+		cardResponse.setPageNo(fundraisers.getNumber());
+		cardResponse.setPageSize(fundraisers.getSize());
+		cardResponse.setTotalElements(fundraisers.getTotalElements());
+		cardResponse.setTotalPages(fundraisers.getTotalPages());
+		cardResponse.setLastPage(fundraisers.isLast());
+
+		return cardResponse;
+	}
+
+//	delete if previous display exists
+	private boolean hasPreviousDisplay(Fundraiser fundraiser) {
+
+		boolean isDeleted = false;
+
+		if (fundraiser.getDisplayPhoto() != null && !fundraiser.getDisplayPhoto().equals("")
+				&& !fundraiser.getDisplayPhoto().equals(this.DEFAULT_DISPLAY_IMAGE)) {
+
+			try {
+				this.fileService.deleteFile(displayImagePath, fundraiser.getDisplayPhoto());
+				isDeleted = true;
+			} catch (IOException e) {
+				throw new ApiException("OOPS!! Something went wrong. Could not update display image.",
+						HttpStatus.BAD_REQUEST, false);
+			}
+
+			if (isDeleted == false) {
+				throw new ApiException("OOPS!! Something went wrong. Could not update display image.",
+						HttpStatus.BAD_REQUEST, false);
+			}
+		}
+		return isDeleted;
 	}
 }
