@@ -24,15 +24,16 @@ public interface FundraiserService {
 
 //	Get Fundraiser
 	FundraiserDto getFundraiserById(Long fId);
-	
-	FundraiserDetailsResponse getFundraiserById1(Long fId);
 
+	FundraiserDetailsResponse getFundraiserById1(Long fId);
 
 	FundraiserCardResponse getAllFundraisers(Integer pageNumber, Integer pageSize);
 
 	FundraiserCardResponse getAllActiveFundraisers(Integer pageNumber, Integer pageSize);
 
-	FundraiserCardResponse getLatestFundraiser();
+	FundraiserCardResponse getFundraisersByCategories(Long[] categoryId, Integer pageNumber, Integer pageSize);
+
+	FundraiserCardResponse getLatestFundraiser(Integer pageNumber, Integer pageSize);
 
 	FundraiserCardResponse getFundraiserByEmail(String email, Integer pageNumber, Integer pageSize);
 
@@ -63,5 +64,4 @@ public interface FundraiserService {
 
 	FundraiserCardResponse findByIsReviewedFalse(Integer pageNumber, Integer pageSize);
 
-	FundraiserCardResponse getFundraisersByCategories(Long[] categoryId, Integer pageNumber, Integer pageSize);
 }

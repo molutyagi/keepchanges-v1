@@ -246,10 +246,13 @@ public class FundraiserServiceImpl implements FundraiserService {
 //	get latest 6
 	@Override
 	@Transactional
-	public FundraiserCardResponse getLatestFundraiser() {
-		List<Fundraiser> fundraisers = this.fundraiserRepository.findTop6ByIsActiveTrueOrderByIdDesc();
-		System.out.println("service impl");
-		return this.fundraiserToResponseDto(fundraisers);
+	public FundraiserCardResponse getLatestFundraiser(Integer pageNumber, Integer pageSize) {
+
+		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+
+		Page<Fundraiser> page = this.fundraiserRepository.findTop6ByIsActiveTrueOrderByIdDesc(pageable);
+
+		return this.pageFundraiserToDto(page);
 	}
 
 //	by email

@@ -40,6 +40,9 @@ public class FundraiserCardDto {
 	@JsonProperty(access = Access.READ_ONLY)
 	private FundraiserStatus status;
 
+	@JsonProperty(access = Access.READ_ONLY)
+	private Boolean isReviewed;
+
 	@Override
 	public String toString() {
 		return "FundraiserDto [id=" + id + ", fundraiserTitle=" + fundraiserTitle + ", beneficiary=" + beneficiary

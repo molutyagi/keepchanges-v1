@@ -310,9 +310,10 @@ public class FundraiserController {
 
 	// Get Latest fundraisers
 	@GetMapping(value = { "latest", "latest/", "getall/latest", "getall/latest/" })
-	public ResponseEntity<FundraiserCardResponse> getLatestFive() {
+	public ResponseEntity<FundraiserCardResponse> getLatest(	@RequestParam(defaultValue = "0") Integer pageNumber,
+			@RequestParam(defaultValue = "100") Integer pageSize) {
 		System.out.println("controller");
-		return ResponseEntity.ok(this.fundraiserService.getLatestFundraiser());
+		return ResponseEntity.ok(this.fundraiserService.getLatestFundraiser(pageNumber, pageSize));
 	}
 
 	// Get By Email

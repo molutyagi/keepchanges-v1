@@ -34,7 +34,7 @@ public interface FundraiserRepository extends JpaRepository<Fundraiser, Long> {
 
 	Page<Fundraiser> findAllByIsActiveTrueAndPostedBy(User user, Pageable pageable);
 
-	List<Fundraiser> findTop6ByIsActiveTrueOrderByIdDesc();
+	Page<Fundraiser> findTop6ByIsActiveTrueOrderByIdDesc(Pageable pageable);
 
 	Page<Fundraiser> findByIsReviewedFalse(Pageable pageable);
 
