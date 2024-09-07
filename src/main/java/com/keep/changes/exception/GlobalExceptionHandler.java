@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.keep.changes.payload.response.ApiResponse;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -230,6 +231,12 @@ public class GlobalExceptionHandler {
 
 		if (exception instanceof NoResourceFoundException) {
 			System.out.println("20");
+			ApiResponse response = new ApiResponse(exception.getMessage(), false);
+			return new ResponseEntity<ApiResponse>(response, HttpStatus.NOT_FOUND);
+		}
+
+		if (exception instanceof JsonProcessingException) {
+			System.out.println("21");
 			ApiResponse response = new ApiResponse(exception.getMessage(), false);
 			return new ResponseEntity<ApiResponse>(response, HttpStatus.NOT_FOUND);
 		}

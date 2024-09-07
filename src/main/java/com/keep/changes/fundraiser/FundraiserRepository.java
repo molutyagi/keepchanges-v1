@@ -1,9 +1,11 @@
 package com.keep.changes.fundraiser;
 
 import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.keep.changes.category.Category;
@@ -12,35 +14,37 @@ import com.keep.changes.user.User;
 @Repository
 public interface FundraiserRepository extends JpaRepository<Fundraiser, Long> {
 
-	@Query("SELECT f FROM Fundraiser f WHERE f.isActive=true")
-	List<Fundraiser> findAllActiveFundraisers();
+	Page<Fundraiser> findAllByIsActiveTrue(Pageable pageable);
 
-	List<Fundraiser> findByEmail(String email);
+	List<Fundraiser> findAllByIsActiveTrue();
 
-	List<Fundraiser> findByPhone(String phone);
+	Page<Fundraiser> findAllByIsActiveTrueAndEmailContaining(String email, Pageable pageable);
 
-	List<Fundraiser> findByFundraiserTitleContaining(String keyWord);
+	Page<Fundraiser> findAllByIsActiveTrueAndPhoneContaining(String phone, Pageable pageable);
 
-	@Query("SELECT f FROM Fundraiser f WHERE f.category= :category AND isActive=true")
-	List<Fundraiser> findByCategory(@Param("category") Category category);
+	Page<Fundraiser> findAllByIsActiveTrueAndFundraiserTitleContaining(String keyWord, Pageable pageable);
 
-	List<Fundraiser> findByPostedBy(User user);
+	Page<Fundraiser> findAllByIsActiveTrueAndCategory(Category category, Pageable pageable);
 
-	@Query("SELECT f FROM Fundraiser f WHERE f.isActive=true ORDER BY f.id DESC LIMIT 6")
-	List<Fundraiser> findLatestFundraisers();
+	Page<Fundraiser> findAllByIsActiveTrueAndCategoryIn(List<Category> category, Pageable pageable);
 
-	@Query("SELECT f FROM Fundraiser f WHERE f.postedBy= :user AND f.isActive=true")
-	List<Fundraiser> findActiveByPostedBy(@Param("user") User user);
+	Page<Fundraiser> findByPostedBy(User user, Pageable pageable);
+
+	Page<Fundraiser> findAllByIsActiveTrueAndPostedByIn(List<User> user, Pageable pageable);
+
+	Page<Fundraiser> findAllByIsActiveTrueAndPostedBy(User user, Pageable pageable);
+
+	Page<Fundraiser> findTop6ByIsActiveTrueOrderByIdDesc(Pageable pageable);
+
+	Page<Fundraiser> findByIsReviewedFalse(Pageable pageable);
 
 //	admin dashboard 
-	@Query("SELECT SUM(f.raised) FROM Fundraiser f")
-	Double sumOfRaised();
+	@Query("SELECT SUM(raised) FROM Fundraiser f WHERE f.isActive = true")
+	Double sumRaisedByIsActive();
 
 	@Query("SELECT SUM(f.raiseGoal) FROM Fundraiser f")
 	Double sumOfRaiseGoal();
 
 	Long countAllByIsActive(Boolean isActive);
-
-	List<Fundraiser> findByIsReviewedFalse();
 
 }

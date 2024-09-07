@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +48,7 @@ public class CategoryController {
 	private String DEFAULT_CATEGORY_SVG;
 
 //	create complete category in one go
+	@CacheEvict(cacheNames = { "categories" }, allEntries = true)
 	@PostMapping(value = { "add/", "add" })
 	@PreAuthorize("@categoryController.authenticatedUser(hasRole('ADMIN'))")
 	public ResponseEntity<?> createCategory(
@@ -81,6 +84,7 @@ public class CategoryController {
 //	}
 
 //	patch complete category
+	@CacheEvict(cacheNames = { "categories" }, allEntries = true)
 	@PatchMapping(value = { "category_{cId}", "category_{cId}/" })
 	@PreAuthorize("@categoryController.authenticatedUser(hasRole('ADMIN'))")
 	public ResponseEntity<?> updateCategoryAndSvg(@Valid @PathVariable Long cId,
@@ -116,6 +120,7 @@ public class CategoryController {
 	}
 
 //	delete
+	@CacheEvict(cacheNames = { "categories" }, allEntries = true)
 	@DeleteMapping(value = { "category_{cId}", "category_{cId}/" })
 	@PreAuthorize("@categoryController.authenticatedUser(hasRole('ADMIN'))")
 	public ResponseEntity<ApiResponse> deleteCategory(@Valid @PathVariable Long cId) {
@@ -134,6 +139,7 @@ public class CategoryController {
 	}
 
 //	get all
+//	@Cacheable(cacheNames = "all-categories")
 	@GetMapping(value = { "getall", "getall/", "", "/" })
 	public ResponseEntity<List<CategoryDto>> getAllAccounts() {
 
@@ -177,6 +183,7 @@ public class CategoryController {
 //		return ResponseEntity.ok(this.categoryService.putUpdateCategory(cId, categoryDto));
 //	}
 
+	@CacheEvict(cacheNames = { "categories" }, allEntries = true)
 	@DeleteMapping(value = { "category_{cId}/svg", "category_{cId}/svg/" })
 	@PreAuthorize("@categoryController.authenticatedUser(hasRole('ADMIN'))")
 	public ResponseEntity<?> deleteSvg(@Valid @PathVariable Long cId) {

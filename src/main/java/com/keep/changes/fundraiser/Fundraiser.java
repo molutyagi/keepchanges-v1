@@ -16,7 +16,6 @@ import com.keep.changes.fundraiser.document.FundraiserDocument;
 import com.keep.changes.fundraiser.photo.Photo;
 import com.keep.changes.transaction.Transaction;
 import com.keep.changes.user.User;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,10 +33,16 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.Email;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @EntityListeners(FundraiserEntityListener.class)
 public class Fundraiser {
 
@@ -58,11 +63,13 @@ public class Fundraiser {
 
 	private Double raised = 0.0;
 
+	private Double totalRaised;
+
 	@Email
-	@Column(columnDefinition = "varchar(30)")
+	@Column(columnDefinition = "varchar(50)")
 	private String email;
 
-	@Column(columnDefinition = "varchar(13)")
+	@Column(columnDefinition = "varchar(50)")
 	private String phone;
 
 	@CreationTimestamp
@@ -125,7 +132,7 @@ public class Fundraiser {
 	private Set<FundraiserDonation> donations = new HashSet<>();
 
 	public void putUpdateFundraiser(Long id, String fundraiserTitle, String fundraiserDescription, String beneficiary,
-			double raiseGoal, String email, String phone, Date endDate, String displayPhoto, String coverPhoto) {
+			double raiseGoal, String email, String phone, Date endDate, String displayPhoto) {
 
 		this.id = id;
 		this.fundraiserTitle = fundraiserTitle;
@@ -147,6 +154,37 @@ public class Fundraiser {
 				+ ", approval=" + approval + ", status=" + status + ", category=" + category + ", postedBy=" + postedBy
 				+ ", photos=" + photos + ", address=" + address + ", account=" + account + ", donations=" + donations
 				+ "]";
+	}
+
+	public Fundraiser(String fundraiserTitle, String fundraiserDescription, String beneficiary, Double raiseGoal,
+			Double raised, @Email String email, String phone, Date startDate, Date endDate, Date lastModifiedDate,
+			String displayPhoto, Boolean isActive, AdminApproval approval, String adminRemarks, Boolean isReviewed,
+			FundraiserStatus status) {
+		super();
+		this.fundraiserTitle = fundraiserTitle;
+		this.fundraiserDescription = fundraiserDescription;
+		this.beneficiary = beneficiary;
+		this.raiseGoal = raiseGoal;
+		this.raised = raised;
+		this.email = email;
+		this.phone = phone;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.lastModifiedDate = lastModifiedDate;
+		this.displayPhoto = displayPhoto;
+		this.isActive = isActive;
+		this.approval = approval;
+		this.adminRemarks = adminRemarks;
+		this.isReviewed = isReviewed;
+		this.status = status;
+	}
+
+	public void calculateTotalRaised() {
+		if (donations != null) {
+			this.totalRaised = donations.stream().mapToDouble(FundraiserDonation::getDonationAmount).sum();
+		} else {
+			this.totalRaised = 0.0;
+		}
 	}
 
 }

@@ -1,9 +1,12 @@
 package com.keep.changes.transaction;
 
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,7 +27,9 @@ public class TransactionController {
 	private TransactionService service;
 
 	@PostMapping("create-order")
-	public ResponseEntity<String> createTransactionOrder(@RequestBody TransactionRequest request) {
+	public ResponseEntity<String> createTransactionOrder(@RequestBody OrderRequest request) {
+
+		System.out.println("order request: " + request.toString());
 		return ResponseEntity.ok(this.service.createOrder(request));
 	}
 
@@ -37,9 +42,15 @@ public class TransactionController {
 		return this.service.verifyTransaction(razorpay_payment_id, razorpay_order_id, razorpay_signature)
 				.thenApply(isVerified -> {
 					if (isVerified) {
-						return ResponseEntity.ok(new ApiResponse("Payment verified.", isVerified));
+						HttpHeaders headers = new HttpHeaders();
+						headers.setLocation(URI.create("http://localhost:5173/donation/successful"));
+						return new ResponseEntity<>(new ApiResponse("Payment verified.", isVerified), headers,
+								HttpStatus.FOUND);
 					} else {
-						return ResponseEntity.ok(new ApiResponse("Payment verification failed.", isVerified));
+						HttpHeaders headers = new HttpHeaders();
+						headers.setLocation(URI.create("http://localhost:5173/donation/failed"));
+						return new ResponseEntity<>(new ApiResponse("Payment failed.", isVerified), headers,
+								HttpStatus.FOUND);
 					}
 				});
 	}
