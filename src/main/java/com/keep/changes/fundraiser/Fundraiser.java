@@ -63,6 +63,8 @@ public class Fundraiser {
 
 	private Double raised = 0.0;
 
+	private Double totalRaised;
+
 	@Email
 	@Column(columnDefinition = "varchar(50)")
 	private String email;
@@ -130,7 +132,7 @@ public class Fundraiser {
 	private Set<FundraiserDonation> donations = new HashSet<>();
 
 	public void putUpdateFundraiser(Long id, String fundraiserTitle, String fundraiserDescription, String beneficiary,
-			double raiseGoal, String email, String phone, Date endDate, String displayPhoto, String coverPhoto) {
+			double raiseGoal, String email, String phone, Date endDate, String displayPhoto) {
 
 		this.id = id;
 		this.fundraiserTitle = fundraiserTitle;
@@ -176,7 +178,13 @@ public class Fundraiser {
 		this.isReviewed = isReviewed;
 		this.status = status;
 	}
-	
-	
+
+	public void calculateTotalRaised() {
+		if (donations != null) {
+			this.totalRaised = donations.stream().mapToDouble(FundraiserDonation::getDonationAmount).sum();
+		} else {
+			this.totalRaised = 0.0;
+		}
+	}
 
 }

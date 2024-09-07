@@ -10,6 +10,8 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +35,7 @@ import com.keep.changes.account.AccountDto;
 import com.keep.changes.account.AccountService;
 import com.keep.changes.category.CategoryDto;
 import com.keep.changes.category.CategoryService;
+import com.keep.changes.config.AppConstants;
 import com.keep.changes.exception.ApiException;
 import com.keep.changes.file.FileService;
 import com.keep.changes.fundraiser.document.FundraiserDocumentDto;
@@ -87,8 +90,19 @@ public class FundraiserController {
 	@Value("${fundraiser-profile.default}")
 	private String DEFAULT_DISPLAY_IMAGE;
 
+	private final String PAGE_NUMBER = AppConstants.PAGE_NUMBER;
+
+	private final String PAGE_SIZE = AppConstants.PAGE_SIZE;
+
+	private final String ORDER = AppConstants.ORDER;
+
+	private final String SORT_BY = AppConstants.SORT_BY;
+
 	// Fundraiser Controllers
 	// add complete fundraiser in a single request
+
+	@CacheEvict(cacheNames = { "latest-fundraisers", "all-fundraisers", "active-fundraisers",
+			"fundraiser" }, allEntries = true)
 	@PostMapping(value = { "add", "add/" })
 	public ResponseEntity<?> createFundraiser(
 			@Valid @RequestParam(value = "displayImage", required = false) MultipartFile displayImage,
@@ -110,7 +124,7 @@ public class FundraiserController {
 		try {
 			fundraiserDto = this.objectMapper.readValue(fundraiserData, FundraiserDto.class);
 		} catch (JsonProcessingException e) {
-			throw new ApiException("Invalid request data.", HttpStatus.BAD_REQUEST, false);
+			throw new ApiException("Invalid request data: "+e.getLocalizedMessage(), HttpStatus.BAD_REQUEST, false);
 		}
 
 		Set<ConstraintViolation<FundraiserDto>> violations = validator.validate(fundraiserDto);
@@ -135,6 +149,7 @@ public class FundraiserController {
 
 		// save fundraiser
 		try {
+			System.out.println(fundraiserDto);
 			createdFundraiser = this.fundraiserService.createFundraiser(fundraiserDto);
 		} catch (Exception e) {
 			try {
@@ -279,6 +294,7 @@ public class FundraiserController {
 	// -------------------------Fundraiser Get Controllers-------------------------
 
 	// By Id
+//	@Cacheable(cacheNames = "fundraiser")
 	@GetMapping(value = { "fundraiser_{fId}", "fundraiser_{fId}/", "fundraiser/{fId}", "fundraiser/{fId}/" })
 	public ResponseEntity<FundraiserDetailsResponse> getById(@PathVariable long fId) {
 
@@ -286,32 +302,39 @@ public class FundraiserController {
 	}
 
 	// Get All Active
+//	@Cacheable(cacheNames = "active-fundraisers")
 	@GetMapping(value = { "active", "active/", "getall/active", "getall/active/" })
-	public ResponseEntity<FundraiserCardResponse> getAllActive(@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
-		return ResponseEntity.ok(this.fundraiserService.getAllActiveFundraisers(pageNumber, pageSize));
+	public ResponseEntity<FundraiserCardResponse> getAllActive(
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize,
+			@RequestParam(defaultValue = SORT_BY) String sortBy, @RequestParam(defaultValue = ORDER) String order) {
+		return ResponseEntity.ok(this.fundraiserService.getAllActiveFundraisers(pageNumber, pageSize, sortBy, order));
 	}
 
 	// Get All
+//	@Cacheable(cacheNames = "all-fundraisers")
 	@GetMapping(value = { "", "/", "getall", "getall/" })
-	public ResponseEntity<FundraiserCardResponse> getAll(@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+	public ResponseEntity<FundraiserCardResponse> getAll(@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 		return ResponseEntity.ok(this.fundraiserService.getAllFundraisers(pageNumber, pageSize));
 	}
 
 	// get 100 by pagination
 	// Get All Active
 	@GetMapping(value = { "active100", "active100/", "getall/active100", "getall/active100/" })
-	public ResponseEntity<FundraiserCardResponse> getActive(@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+	public ResponseEntity<FundraiserCardResponse> getActive(
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 
 		return ResponseEntity.ok(this.fundraiserService.getActive100Fundraisers(pageNumber, pageSize));
 	}
 
 	// Get Latest fundraisers
+//	@Cacheable(cacheNames = "latest-fundraisers")
 	@GetMapping(value = { "latest", "latest/", "getall/latest", "getall/latest/" })
-	public ResponseEntity<FundraiserCardResponse> getLatest(	@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+	public ResponseEntity<FundraiserCardResponse> getLatest(
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 		System.out.println("controller");
 		return ResponseEntity.ok(this.fundraiserService.getLatestFundraiser(pageNumber, pageSize));
 	}
@@ -319,16 +342,16 @@ public class FundraiserController {
 	// Get By Email
 	@GetMapping(value = { "email/{email}", "email/{email}/", "getall/email/{email}", "getall/email/{email}/" })
 	public ResponseEntity<FundraiserCardResponse> getByEmail(@Valid @PathVariable String email,
-			@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 		return ResponseEntity.ok(this.fundraiserService.getFundraiserByEmail(email, pageNumber, pageSize));
 	}
 
 	// Get By Phone
 	@GetMapping(value = { "phone/{phone}", "phone/{phone}/", "getall/phone/{phone}", "getall/phone/{phone}/" })
 	public ResponseEntity<FundraiserCardResponse> getByPhone(@Valid @PathVariable String phone,
-			@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 
 		return ResponseEntity.ok(this.fundraiserService.getFundraiserByPhone(phone, pageNumber, pageSize));
 	}
@@ -336,8 +359,8 @@ public class FundraiserController {
 	// Get By Title
 	@GetMapping(value = { "title/{title}", "title/{title}/", "getall/title/{title}", "getall/title/{title}/" })
 	public ResponseEntity<FundraiserCardResponse> getByTitle(@Valid @PathVariable String title,
-			@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByTitle(title, pageNumber, pageSize));
 	}
@@ -346,8 +369,8 @@ public class FundraiserController {
 	@GetMapping(value = { "postedby/{username}", "postedby/{username}/", "getall/postedby/{username}",
 			"getall/postedby/{username}/" })
 	public ResponseEntity<FundraiserCardResponse> getByPoster(@Valid @PathVariable String username,
-			@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPoster(username, pageNumber, pageSize));
 	}
@@ -355,8 +378,8 @@ public class FundraiserController {
 //	Get By Poster Id
 	@GetMapping(value = { "poster/{pId}", "poster/{pId}/", "getall/poster/{pId}", "getall/poster/{pId}/" })
 	public ResponseEntity<FundraiserCardResponse> getByPosterId(@Valid @PathVariable Long pId,
-			@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByPosterId(pId, pageNumber, pageSize));
 	}
@@ -365,8 +388,8 @@ public class FundraiserController {
 	@GetMapping(value = { "poster/{pId}/active", "poster/{pId}/active", "getall/poster/{pId}/active",
 			"getall/poster/{pId}/active/" })
 	public ResponseEntity<FundraiserCardResponse> getActiveByPosterId(@Valid @PathVariable Long pId,
-			@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 
 		return ResponseEntity.ok(this.fundraiserService.getActiveFundraisersByPosterId(pId, pageNumber, pageSize));
 	}
@@ -375,8 +398,8 @@ public class FundraiserController {
 	@GetMapping(value = { "category/{categoryId}", "category/{categoryId}/", "getall/category/{categoryId}",
 			"getall/category/{categoryId}/" })
 	public ResponseEntity<FundraiserCardResponse> getByCategory(@Valid @PathVariable Long categoryId,
-			@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 
 		return ResponseEntity.ok(this.fundraiserService.getFundraisersByCategory(categoryId, pageNumber, pageSize));
 	}
@@ -385,8 +408,8 @@ public class FundraiserController {
 	@GetMapping(value = { "category/", "category/", "getall/category", "getall/category/" })
 	public ResponseEntity<FundraiserCardResponse> getByMultpleCategories(
 			@Valid @RequestParam("categoryIds") Long categoryIds[],
-			@RequestParam(defaultValue = "0") Integer pageNumber,
-			@RequestParam(defaultValue = "100") Integer pageSize) {
+			@RequestParam(defaultValue = PAGE_NUMBER) Integer pageNumber,
+			@RequestParam(defaultValue = PAGE_SIZE) Integer pageSize) {
 
 		System.out.println(categoryIds);
 

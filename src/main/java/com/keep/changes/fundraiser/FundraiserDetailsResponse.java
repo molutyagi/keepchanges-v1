@@ -1,11 +1,10 @@
 package com.keep.changes.fundraiser;
 
+import java.util.Date;
 import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.keep.changes.category.CategoryDto;
 import com.keep.changes.fundraiser.document.FundraiserDocumentDto;
 import com.keep.changes.fundraiser.photo.PhotoDto;
 import io.micrometer.common.lang.NonNull;
@@ -13,6 +12,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +21,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
+@Data
 public class FundraiserDetailsResponse {
 	private Long id;
 
@@ -50,20 +51,19 @@ public class FundraiserDetailsResponse {
 
 	private String displayPhoto;
 
-	@JsonProperty(access = Access.READ_ONLY)
 	private AdminApproval approval;
 
-	@JsonProperty(access = Access.READ_ONLY)
 	private String adminRemarks;
 
-	@JsonProperty(access = Access.READ_ONLY)
 	private FundraiserStatus status;
 
-	@JsonProperty(access = Access.READ_ONLY)
 	private Boolean isActive;
 
-	@NonNull
-	private CategoryDto category;
+	private Date endDate;
+
+	private Long categoryId;
+
+	private String categoryName;
 
 	private Long postedById;
 
@@ -77,15 +77,7 @@ public class FundraiserDetailsResponse {
 
 	private String bankName;
 
-	private Set<DonationDto> donations;
-
-	@Override
-	public String toString() {
-		return "FundraiserDto [id=" + id + ", fundraiserTitle=" + fundraiserTitle + ", fundraiserDescription="
-				+ fundraiserDescription + ", beneficiary=" + beneficiary + ", raiseGoal=" + raiseGoal + ", raised="
-				+ raised + ", email=" + email + ", phone=" + phone + ", displayPhoto=" + displayPhoto + ", isActive="
-				+ isActive + ", approval=" + approval + ", status=" + status + ", category=" + category + ", photos="
-				+ photos;
-	}
+	@JsonProperty("donations")
+	private Set<FundraiserDonationDto> transactions;
 
 }

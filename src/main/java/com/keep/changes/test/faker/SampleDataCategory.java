@@ -19,9 +19,9 @@ public class SampleDataCategory {
 
 	private final CategoryRepository categoryRepository;
 	private static final Faker faker = new Faker();
-	private static final int BATCH_SIZE = 200; // Adjust batch size as needed
+	private static final int BATCH_SIZE = 20; // Adjust batch size as needed
 	private static final Long MIN_ID = (long) 1;
-	private static final Long MAX_ID = (long) 300;
+	private static final Long MAX_ID = (long) 50;
 
 	private static Long nextId = MIN_ID; // Track the next ID to be assigned
 

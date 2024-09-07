@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -58,6 +59,8 @@ public class FundraiserServiceImpl implements FundraiserService {
 	@Override
 	@Transactional
 	public FundraiserDto createFundraiser(FundraiserDto fundraiserDto) {
+		
+		System.out.println(fundraiserDto);
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String loggedInUser = authentication.getName();
@@ -95,8 +98,7 @@ public class FundraiserServiceImpl implements FundraiserService {
 				.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id", fId));
 
 		fundraiser.putUpdateFundraiser(fId, fd.getFundraiserTitle(), fd.getFundraiserDescription(), fd.getBeneficiary(),
-				fd.getRaiseGoal(), fd.getEmail(), fd.getPhone(), fd.getEndDate(), fd.getDisplayPhoto(),
-				fd.getCoverPhoto());
+				fd.getRaiseGoal(), fd.getEmail(), fd.getPhone(), fd.getEndDate(), fd.getDisplayPhoto());
 
 		Fundraiser updated = this.fundraiserRepository.save(fundraiser);
 
@@ -222,9 +224,18 @@ public class FundraiserServiceImpl implements FundraiserService {
 //	get all active
 	@Override
 	@Transactional
-	public FundraiserCardResponse getAllActiveFundraisers(Integer pageNumber, Integer pageSize) {
+	public FundraiserCardResponse getAllActiveFundraisers(Integer pageNumber, Integer pageSize, String sortBy,
+			String order) {
 
-		Pageable pageable = PageRequest.of(pageNumber, pageSize);
+		Sort sort = null;
+
+		if (order.equalsIgnoreCase("asc") || order.equalsIgnoreCase("ascending")) {
+			sort = Sort.by(sortBy).ascending();
+		} else {
+			sort = Sort.by(sortBy).descending();
+		}
+
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 
 		Page<Fundraiser> page = this.fundraiserRepository.findAllByIsActiveTrue(pageable);
 

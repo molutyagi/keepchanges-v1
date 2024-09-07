@@ -27,9 +27,9 @@ public class SampleDataUser {
 	private final RoleRepository roleRepository;
 	private final PasswordEncoder passwordEncoder;
 	private static final Faker faker = new Faker();
-	private static final int BATCH_SIZE = 2000; // Adjust batch size as needed
+	private static final int BATCH_SIZE = 20; // Adjust batch size as needed
 	private static final Long MIN_ID = (long) 2;
-	private static final Long MAX_ID = (long) 3000;
+	private static final Long MAX_ID = (long) 30;
 
 	private static Long nextId = MIN_ID; // Track the next ID to be assigned
 

@@ -31,9 +31,9 @@ public class SampleDataFundraiser {
 	private final CategoryRepository categoryRepository;
 
 	private static final Faker faker = new Faker();
-	private static final int BATCH_SIZE = 5000; // Adjust batch size as needed
+	private static final int BATCH_SIZE = 50; // Adjust batch size as needed
 	private static final Long MIN_ID = (long) 1;
-	private static final Long MAX_ID = (long) 5010;
+	private static final Long MAX_ID = (long) 100;
 
 	private static Long nextId = MIN_ID; // Track the next ID to be assigned
 
@@ -49,7 +49,7 @@ public class SampleDataFundraiser {
 
 		for (int i = 0; i < BATCH_SIZE; i++) {
 
-			if (nextId % 50 == 0) {
+			if (nextId % 25 == 0) {
 				uId++;
 				cId++;
 				user = this.getUser(uId);

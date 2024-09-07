@@ -1,5 +1,7 @@
 package com.keep.changes.transaction;
 
+import org.springframework.data.annotation.CreatedDate;
+
 import com.keep.changes.fundraiser.Fundraiser;
 
 import jakarta.persistence.Entity;
@@ -20,11 +22,15 @@ public class Transaction {
 
 	private String razorpayOrderId; // Unique ID from Razorpay
 	private String razorpayPaymentId; // Unique ID for the payment within Razorpay
+	private String razorpaySignature;
+
 	private Double totalAmount; // Transaction amount
 	private Double donationAmount; // Donation amount
 	private Double tipAmount; // Tip amount
 	private String currency; // Transaction currency (e.g., INR, USD)
 	private String status; // Payment status (e.g., "captured", "authorized", "failed")
+	
+	@CreatedDate
 	private String createdAt; // Timestamp when transaction was created in Razorpay
 	// Additional fields (optional)
 	private String method; // Payment method used (e.g., "card", "netbanking")

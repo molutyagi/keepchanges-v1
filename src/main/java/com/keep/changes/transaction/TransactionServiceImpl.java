@@ -3,6 +3,7 @@ package com.keep.changes.transaction;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import javax.crypto.Mac;
@@ -19,6 +20,7 @@ import com.keep.changes.exception.ResourceNotFoundException;
 import com.keep.changes.fundraiser.Fundraiser;
 import com.keep.changes.fundraiser.FundraiserRepository;
 import com.razorpay.Order;
+import com.razorpay.Payment;
 import com.razorpay.RazorpayClient;
 import com.razorpay.RazorpayException;
 import com.razorpay.Utils;
@@ -35,6 +37,9 @@ public class TransactionServiceImpl implements TransactionService {
 	private String RAZORPAY_KEY_SECRET;
 
 	@Autowired
+	private OrderRepository orderRepository;
+
+	@Autowired
 	private TransactionRepository transactionRepository;
 
 	@Autowired
@@ -45,19 +50,16 @@ public class TransactionServiceImpl implements TransactionService {
 
 	@Override
 	@Transactional
-	public String createOrder(TransactionRequest tr) {
-
-		TransactionResponse response = new TransactionResponse();
-
-		Transaction transaction = new Transaction();
+	public String createOrder(OrderRequest or) {
 
 		try {
+//			create order
 			RazorpayClient razorpay = new RazorpayClient(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET);
 
 			JSONObject orderRequest = new JSONObject();
-			orderRequest.put("amount", tr.getTotalAmount() * 100); // amount in the smallest currency unit
-			orderRequest.put("currency", tr.getCurrency());
-			orderRequest.put("receipt", "fundraiser_" + tr.getFundraiserId());
+			orderRequest.put("amount", or.getTotalAmount() * 100); // amount in the smallest currency unit
+			orderRequest.put("currency", or.getCurrency());
+			orderRequest.put("receipt", "fundraiser_" + or.getFundraiserId());
 
 			Order order = razorpay.orders.create(orderRequest);
 
@@ -66,15 +68,14 @@ public class TransactionServiceImpl implements TransactionService {
 
 			System.out.println(order);
 
-			transaction.setRazorpayOrderId(order.get("id"));
-			transaction.setCurrency(order.get("currency"));
-			transaction.setTotalAmount(tr.getTotalAmount());
+			OrderEntity orderEntity = this.modelMapper.map(or, OrderEntity.class);
+			orderEntity.setRazorpayOrderId(order.get("id"));
 
 			System.out.println("transaction");
-			System.out.println(transaction.getRazorpayOrderId());
+			System.out.println(orderEntity.getRazorpayOrderId());
 
 			System.out.println("heereeeeeeeeeeeee");
-			this.transactionRepository.save(transaction);
+			this.orderRepository.save(orderEntity);
 			System.out.println("ye bhi chala");
 
 			return order.toString();
@@ -91,22 +92,61 @@ public class TransactionServiceImpl implements TransactionService {
 	@Async
 	public CompletableFuture<Boolean> verifyTransaction(String razorpay_payment_id, String razorpay_order_id,
 			String razorpay_signature) {
-		Transaction transaction = this.transactionRepository.findByRazorpayOrderId(razorpay_order_id)
-				.orElseThrow(() -> new ResourceNotFoundException("Transaction", "Order Id", razorpay_order_id));
+
+		OrderEntity orderEntity = this.orderRepository.findByRazorpayOrderId(razorpay_order_id)
+				.orElseThrow(() -> new ResourceNotFoundException("Order", "Id", razorpay_order_id));
 
 		JSONObject options = new JSONObject();
-		options.put("razorpay_order_id", transaction.getRazorpayOrderId());
+		options.put("razorpay_order_id", orderEntity.getRazorpayOrderId());
 		options.put("razorpay_payment_id", razorpay_payment_id);
 		options.put("razorpay_signature", razorpay_signature);
 
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				return Utils.verifyPaymentSignature(options, RAZORPAY_KEY_SECRET);
+				boolean verifyPaymentSignature = Utils.verifyPaymentSignature(options, RAZORPAY_KEY_SECRET);
+
+				if (verifyPaymentSignature && this.verifyPayment(razorpay_payment_id)) {
+
+					Fundraiser fundraiser = this.fundraiserRepository.findById(orderEntity.getFundraiserId())
+							.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id",
+									orderEntity.getFundraiserId()));
+
+					Transaction transaction = this.modelMapper.map(orderEntity, Transaction.class);
+					transaction.setFundraiser(fundraiser);
+					transaction.setRazorpayPaymentId(razorpay_payment_id);
+					transaction.setRazorpaySignature(razorpay_signature);
+					transaction.setStatus("captured");
+
+					fundraiser.setRaised(fundraiser.getRaised() + transaction.getDonationAmount());
+					this.fundraiserRepository.save(fundraiser);
+					this.transactionRepository.save(transaction);
+				}
+
+				return verifyPaymentSignature;
 			} catch (RazorpayException e) {
 				e.printStackTrace();
 				return false;
 			}
 		});
+	}
+
+	private boolean verifyPayment(String paymentId) {
+		try {
+			RazorpayClient razorpay = new RazorpayClient(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET);
+			Payment payment = razorpay.payments.fetch(paymentId);
+
+			String paymentStatus = payment.get("status");
+
+			System.out.println("payment status: " + paymentStatus);
+
+			if (paymentStatus.equals("captured")) {
+				return true;
+			}
+		} catch (RazorpayException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	@Override

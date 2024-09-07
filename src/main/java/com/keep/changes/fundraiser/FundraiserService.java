@@ -29,7 +29,7 @@ public interface FundraiserService {
 
 	FundraiserCardResponse getAllFundraisers(Integer pageNumber, Integer pageSize);
 
-	FundraiserCardResponse getAllActiveFundraisers(Integer pageNumber, Integer pageSize);
+	FundraiserCardResponse getAllActiveFundraisers(Integer pageNumber, Integer pageSize, String sortBy, String order);
 
 	FundraiserCardResponse getFundraisersByCategories(Long[] categoryId, Integer pageNumber, Integer pageSize);
 

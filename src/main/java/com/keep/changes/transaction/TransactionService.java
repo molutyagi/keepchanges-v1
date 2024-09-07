@@ -5,7 +5,7 @@ import java.util.concurrent.CompletableFuture;
 
 public interface TransactionService {
 
-	String createOrder(TransactionRequest transactionRequest);
+	String createOrder(OrderRequest transactionRequest);
 
 	TransactionDto saveTransaction(Long fId, TransactionDto dto);
 

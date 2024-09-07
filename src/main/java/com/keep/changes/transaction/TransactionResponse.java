@@ -1,8 +1,14 @@
 package com.keep.changes.transaction;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class TransactionResponse {
 
 	private String razorpay_payment_id;
