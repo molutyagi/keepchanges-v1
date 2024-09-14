@@ -1,7 +1,7 @@
 package com.keep.changes.fundraiser;
 
-import java.sql.Date;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,15 +10,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class DonationDto {
+@Data
+public class FundraiserDonationDto {
 
 	private Long id;
 
 	private Double donationAmount;
 
-	private Date donationDate;
-	
-	private String donorName;
-	
-	private String donorEmail;
+	private String name;
 }

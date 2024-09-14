@@ -129,7 +129,7 @@ public class UserController {
 	}
 
 //	Get all
-	@Cacheable
+	@Cacheable("all-users")
 	@GetMapping(value = { "getall", "", "/", "getall/" })
 	public ResponseEntity<List<UserDto>> getAllUsers() {
 
@@ -139,7 +139,7 @@ public class UserController {
 
 //	Get by Id
 	@GetMapping(value = { "user_{uId}", "user_{uId}/" })
-	@Cacheable
+	@Cacheable("get-user")
 	public ResponseEntity<UserDto> getUserById(@PathVariable Long uId) {
 
 		return ResponseEntity.ok(this.userService.getUserById(uId));

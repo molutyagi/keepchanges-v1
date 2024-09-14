@@ -176,10 +176,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Override
 	public void resetPassword(AuthenticationRequest authRequest) {
+
+		System.out.println("reset password service: " + authRequest.getPassword());
 		User user = this.userRepository.findByEmail(authRequest.getUsername())
 				.orElseThrow(() -> new ResourceNotFoundException("User", "Username", authRequest.getUsername()));
 		user.setPassword(this.passwordEncoder.encode(authRequest.getPassword()));
-		this.userRepository.save(user);
+		User user2 = this.userRepository.save(user);
 	}
 
 //	private void setTokenToHttp(String token, int maxAge) {

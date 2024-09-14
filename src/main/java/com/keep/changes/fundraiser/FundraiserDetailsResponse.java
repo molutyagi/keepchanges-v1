@@ -1,14 +1,14 @@
 package com.keep.changes.fundraiser;
 
 import java.util.Date;
-import org.springframework.format.annotation.DateTimeFormat;
+import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.keep.changes.account.AccountDto;
-import com.keep.changes.category.CategoryDto;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.keep.changes.fundraiser.document.FundraiserDocumentDto;
+import com.keep.changes.fundraiser.photo.PhotoDto;
 import io.micrometer.common.lang.NonNull;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Data
-public class FundraiserDto {
+public class FundraiserDetailsResponse {
 	private Long id;
 
 	@NotEmpty
@@ -37,6 +37,9 @@ public class FundraiserDto {
 	@NonNull
 	private Double raiseGoal;
 
+	@JsonProperty(access = Access.READ_ONLY)
+	private Double raised;
+
 	@NotEmpty
 	@Email(message = "Given email is not valid.")
 	@Pattern(regexp = "^([a-zA-Z0-9._%-]{4,}+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,})$", message = "Given email is not valid.")
@@ -46,17 +49,35 @@ public class FundraiserDto {
 	@Pattern(regexp = "(0|91)?[6-9][0-9]{9}", message = "Invalid Number Format.")
 	private String phone;
 
-	@DateTimeFormat(pattern = "dd-MM-yyyy")
-	@Future(message = "End date can only be in future")
-	private Date endDate;
-
-	@NotEmpty
 	private String displayPhoto;
 
-	@NonNull
-	private CategoryDto category;
+	private AdminApproval approval;
 
-	@JsonIgnore
-	private AccountDto account;
+	private String adminRemarks;
+
+	private FundraiserStatus status;
+
+	private Boolean isActive;
+
+	private Date endDate;
+
+	private Long categoryId;
+
+	private String categoryName;
+
+	private Long postedById;
+
+	private String postedByName;
+
+	private Set<PhotoDto> photos;
+
+	private Set<FundraiserDocumentDto> documents;
+
+	private String accountNumber;
+
+	private String bankName;
+
+	@JsonProperty("donations")
+	private Set<FundraiserDonationDto> transactions;
 
 }

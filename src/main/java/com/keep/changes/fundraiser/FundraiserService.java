@@ -2,6 +2,7 @@ package com.keep.changes.fundraiser;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
 import jakarta.validation.Valid;
 
 public interface FundraiserService {
@@ -24,25 +25,31 @@ public interface FundraiserService {
 //	Get Fundraiser
 	FundraiserDto getFundraiserById(Long fId);
 
-	List<FundraiserDto> getAllFundraisers();
+	FundraiserDetailsResponse getFundraiserById1(Long fId);
 
-	List<FundraiserDto> getAllActiveFundraisers();
+	FundraiserCardResponse getAllFundraisers(Integer pageNumber, Integer pageSize);
 
-	List<FundraiserDto> getLatestFundraiser();
+	FundraiserCardResponse getAllActiveFundraisers(Integer pageNumber, Integer pageSize, String sortBy, String order);
 
-	List<FundraiserDto> getFundraiserByEmail(String email);
+	FundraiserCardResponse getFundraisersByCategories(Long[] categoryId, Integer pageNumber, Integer pageSize);
 
-	List<FundraiserDto> getFundraiserByPhone(String phone);
+	FundraiserCardResponse getLatestFundraiser(Integer pageNumber, Integer pageSize);
 
-	List<FundraiserDto> getFundraisersByTitle(String title);
+	FundraiserCardResponse getFundraiserByEmail(String email, Integer pageNumber, Integer pageSize);
 
-	List<FundraiserDto> getFundraisersByCategory(Long categoryId);
+	FundraiserCardResponse getFundraiserByPhone(String phone, Integer pageNumber, Integer pageSize);
 
-	List<FundraiserDto> getFundraisersByPoster(String username);
+	FundraiserCardResponse getFundraisersByTitle(String title, Integer pageNumber, Integer pageSize);
 
-	List<FundraiserDto> getFundraisersByPosterId(Long pId);
+	FundraiserCardResponse getFundraisersByCategory(Long categoryId, Integer pageNumber, Integer pageSize);
 
-	List<FundraiserDto> getActiveFundraisersByPosterId(@Valid Long pId);
+	FundraiserCardResponse getFundraisersByPoster(String username, Integer pageNumber, Integer pageSize);
+
+	FundraiserCardResponse getFundraisersByPosterId(Long pId, Integer pageNumber, Integer pageSize);
+
+	FundraiserCardResponse getActiveFundraisersByPosterId(Long pId, Integer pageNumber, Integer pageSize);
+
+	FundraiserCardResponse getActive100Fundraisers(Integer pageNumber, Integer pageSize);
 
 	void fundraiserAdminService(@Valid Long fId, String adminRemarks, AdminApproval adminStatus);
 
@@ -55,6 +62,6 @@ public interface FundraiserService {
 
 	Long totalActiveFundraisers();
 
-	List<FundraiserDto> findByIsReviewedFalse();
+	FundraiserCardResponse findByIsReviewedFalse(Integer pageNumber, Integer pageSize);
 
 }
