@@ -1,13 +1,16 @@
 package com.keep.changes.transaction;
 
-import com.keep.changes.fundraiser.Fundraiser;
+import java.util.Date;
 
+import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,6 +33,11 @@ public class OrderEntity {
 	private Long fundraiserId;
 	private Double donationAmount;
 	private Double tipAmount;
+
+	@CreationTimestamp
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(updatable = false)
+	private Date createdAt;
 
 	private String razorpayOrderId;
 

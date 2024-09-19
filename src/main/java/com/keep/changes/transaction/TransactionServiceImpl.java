@@ -101,11 +101,15 @@ public class TransactionServiceImpl implements TransactionService {
 		options.put("razorpay_payment_id", razorpay_payment_id);
 		options.put("razorpay_signature", razorpay_signature);
 
+		System.out.println("in verify impl");
+
 		return CompletableFuture.supplyAsync(() -> {
 			try {
 				boolean verifyPaymentSignature = Utils.verifyPaymentSignature(options, RAZORPAY_KEY_SECRET);
 
 				if (verifyPaymentSignature && this.verifyPayment(razorpay_payment_id)) {
+
+					System.out.println("fundraiser id : " + orderEntity.getFundraiserId());
 
 					Fundraiser fundraiser = this.fundraiserRepository.findById(orderEntity.getFundraiserId())
 							.orElseThrow(() -> new ResourceNotFoundException("Fundraiser", "Id",

@@ -50,7 +50,7 @@ public class FundraiserDto {
 	@Future(message = "End date can only be in future")
 	private Date endDate;
 
-	@NotEmpty
+//	@NotEmpty
 	private String displayPhoto;
 
 	@NonNull

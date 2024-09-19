@@ -39,16 +39,18 @@ public class TransactionController {
 			@RequestParam("razorpay_order_id") String razorpay_order_id,
 			@RequestParam("razorpay_signature") String razorpay_signature) {
 
+		System.out.println("in verify transaction controller");
+
 		return this.service.verifyTransaction(razorpay_payment_id, razorpay_order_id, razorpay_signature)
 				.thenApply(isVerified -> {
 					if (isVerified) {
 						HttpHeaders headers = new HttpHeaders();
-						headers.setLocation(URI.create("http://localhost:5173/donation/successful"));
+						headers.setLocation(URI.create("http://localhost:5173/fundraiser/payment-success"));
 						return new ResponseEntity<>(new ApiResponse("Payment verified.", isVerified), headers,
 								HttpStatus.FOUND);
 					} else {
 						HttpHeaders headers = new HttpHeaders();
-						headers.setLocation(URI.create("http://localhost:5173/donation/failed"));
+						headers.setLocation(URI.create("http://localhost:5173/fundraiser/payment-failed"));
 						return new ResponseEntity<>(new ApiResponse("Payment failed.", isVerified), headers,
 								HttpStatus.FOUND);
 					}

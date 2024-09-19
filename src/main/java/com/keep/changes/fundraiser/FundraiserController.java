@@ -11,7 +11,6 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -101,13 +100,15 @@ public class FundraiserController {
 	// Fundraiser Controllers
 	// add complete fundraiser in a single request
 
-	@CacheEvict(cacheNames = { "latest-fundraisers", "all-fundraisers", "active-fundraisers",
-			"fundraiser" }, allEntries = true)
+//	@CacheEvict(cacheNames = { "latest-fundraisers", "all-fundraisers", "active-fundraisers",
+//			"fundraiser" }, allEntries = true)
 	@PostMapping(value = { "add", "add/" })
 	public ResponseEntity<?> createFundraiser(
-			@Valid @RequestParam(value = "displayImage", required = false) MultipartFile displayImage,
+			@Valid @RequestParam(value = "displayImage", required = true) MultipartFile displayImage,
 			@RequestParam(value = "fundraiserData", required = true) String fundraiserData,
 			@RequestParam(value = "categoryId", required = true) Long categoryId) throws IOException {
+
+		System.out.println("Entered controller");
 
 //		verify and validate images
 		if (!this.verifyImage(displayImage)) {
@@ -124,8 +125,10 @@ public class FundraiserController {
 		try {
 			fundraiserDto = this.objectMapper.readValue(fundraiserData, FundraiserDto.class);
 		} catch (JsonProcessingException e) {
-			throw new ApiException("Invalid request data: "+e.getLocalizedMessage(), HttpStatus.BAD_REQUEST, false);
+			throw new ApiException("Invalid request data: " + e.getLocalizedMessage(), HttpStatus.BAD_REQUEST, false);
 		}
+
+		System.out.println("before violation");
 
 		Set<ConstraintViolation<FundraiserDto>> violations = validator.validate(fundraiserDto);
 		if (!violations.isEmpty()) {
@@ -134,6 +137,7 @@ public class FundraiserController {
 
 //		if(fundraiserDto.getEndDate().before(fundraiserDto.getStartDate().C))
 
+		System.out.println("before display image file service");
 		// save and set display image
 		try {
 			displayImageName = this.fileService.uploadImage(displayImagePath, displayImage);
