@@ -1,9 +1,12 @@
 package com.keep.changes.transaction;
 
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.crypto.Mac;
@@ -13,8 +16,14 @@ import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.http.HttpStatus;
 
 import com.keep.changes.exception.ResourceNotFoundException;
 import com.keep.changes.fundraiser.Fundraiser;
@@ -66,7 +75,7 @@ public class TransactionServiceImpl implements TransactionService {
 			JSONObject json = order.toJson();
 			json.put("key", RAZORPAY_KEY_ID);
 
-			System.out.println(order);
+			System.out.println("order: " + order);
 
 			OrderEntity orderEntity = this.modelMapper.map(or, OrderEntity.class);
 			orderEntity.setRazorpayOrderId(order.get("id"));
@@ -90,8 +99,8 @@ public class TransactionServiceImpl implements TransactionService {
 	@Override
 	@Transactional
 	@Async
-	public CompletableFuture<Boolean> verifyTransaction(String razorpay_payment_id, String razorpay_order_id,
-			String razorpay_signature) {
+	public CompletableFuture<PaymentVerificationResult> verifyTransaction(String razorpay_payment_id,
+			String razorpay_order_id, String razorpay_signature) {
 
 		OrderEntity orderEntity = this.orderRepository.findByRazorpayOrderId(razorpay_order_id)
 				.orElseThrow(() -> new ResourceNotFoundException("Order", "Id", razorpay_order_id));
@@ -124,14 +133,38 @@ public class TransactionServiceImpl implements TransactionService {
 					fundraiser.setRaised(fundraiser.getRaised() + transaction.getDonationAmount());
 					this.fundraiserRepository.save(fundraiser);
 					this.transactionRepository.save(transaction);
+					return new PaymentVerificationResult(true, razorpay_payment_id, orderEntity.getTotalAmount(),
+							orderEntity.getTipAmount(), orderEntity.getDonationAmount(), "success");
+				} else {
+					return new PaymentVerificationResult(false, razorpay_payment_id, orderEntity.getTotalAmount(),
+							orderEntity.getTipAmount(), orderEntity.getDonationAmount(), "failed");
 				}
-
-				return verifyPaymentSignature;
 			} catch (RazorpayException e) {
 				e.printStackTrace();
-				return false;
+				return new PaymentVerificationResult(false, razorpay_payment_id, orderEntity.getTotalAmount(),
+						orderEntity.getTipAmount(), orderEntity.getDonationAmount(), "error");
 			}
 		});
+	}
+
+	private ResponseEntity<Void> redirectToPaymentResult(PaymentVerificationResult result) {
+		Map<String, Object> data = new HashMap<>();
+		data.put("paymentId", result.getPaymentId());
+		data.put("amount", result.getTotalAmount());
+		data.put("status", result.getStatus());
+
+		MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+		data.forEach((key, value) -> params.add(key, String.valueOf(value)));
+
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUriString("http://localhost:5173/fundraiser/" + result.getStatus()).queryParams(params);
+		URI uri = builder.build().toUri();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setLocation(uri);
+
+		return new ResponseEntity<>(headers, HttpStatus.FOUND);
+
 	}
 
 	private boolean verifyPayment(String paymentId) {

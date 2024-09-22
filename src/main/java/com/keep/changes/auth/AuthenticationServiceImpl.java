@@ -36,7 +36,6 @@ import com.keep.changes.user.UserRepository;
 import com.keep.changes.user.token.Token;
 import com.keep.changes.user.token.TokenRepository;
 
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;

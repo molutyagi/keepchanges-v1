@@ -59,7 +59,7 @@ public class FundraiserServiceImpl implements FundraiserService {
 	@Override
 	@Transactional
 	public FundraiserDto createFundraiser(FundraiserDto fundraiserDto) {
-		
+
 		System.out.println(fundraiserDto);
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -119,7 +119,7 @@ public class FundraiserServiceImpl implements FundraiserService {
 		Field[] declaredFields = Fundraiser.class.getDeclaredFields();
 		for (Field field : declaredFields) {
 
-			if (field.getName().equals("isActive")) {
+			if (field.getName().equals("isActive") || field.getName().equals("raised")) {
 				break;
 			}
 

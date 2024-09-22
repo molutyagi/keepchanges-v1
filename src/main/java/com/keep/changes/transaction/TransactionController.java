@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import com.keep.changes.payload.response.ApiResponse;
 import jakarta.validation.Valid;
 
 @RestController
@@ -34,7 +34,7 @@ public class TransactionController {
 	}
 
 	@PostMapping("verify-transaction")
-	public CompletableFuture<ResponseEntity<ApiResponse>> verifyTransaction(
+	public CompletableFuture<ResponseEntity<PaymentVerificationResult>> verifyTransaction(
 			@RequestParam("razorpay_payment_id") String razorpay_payment_id,
 			@RequestParam("razorpay_order_id") String razorpay_order_id,
 			@RequestParam("razorpay_signature") String razorpay_signature) {
@@ -42,19 +42,22 @@ public class TransactionController {
 		System.out.println("in verify transaction controller");
 
 		return this.service.verifyTransaction(razorpay_payment_id, razorpay_order_id, razorpay_signature)
-				.thenApply(isVerified -> {
-					if (isVerified) {
-						HttpHeaders headers = new HttpHeaders();
-						headers.setLocation(URI.create("http://localhost:5173/fundraiser/payment-success"));
-						return new ResponseEntity<>(new ApiResponse("Payment verified.", isVerified), headers,
-								HttpStatus.FOUND);
-					} else {
-						HttpHeaders headers = new HttpHeaders();
-						headers.setLocation(URI.create("http://localhost:5173/fundraiser/payment-failed"));
-						return new ResponseEntity<>(new ApiResponse("Payment failed.", isVerified), headers,
-								HttpStatus.FOUND);
-					}
-				});
+				.thenApply(this::createPaymentSuccessResponse);
+
+	}
+
+	private ResponseEntity<PaymentVerificationResult> createPaymentSuccessResponse(PaymentVerificationResult result) {
+
+		System.out.println("RESULT: " + result.getStatus());
+		System.out.println(result);
+
+		UriComponentsBuilder builder = UriComponentsBuilder
+				.fromUriString("http://localhost:5173/fundraiser/payment-success");
+		URI uri = builder.build().toUri();
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setLocation(uri);
+		return new ResponseEntity<>(result, headers, HttpStatus.FOUND);
 	}
 
 	@PostMapping("save-transaction/{fId}")
