@@ -3,6 +3,8 @@ package com.keep.changes.transaction;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.http.ResponseEntity;
+
 public interface TransactionService {
 
 	String createOrder(OrderRequest transactionRequest);
@@ -11,5 +13,8 @@ public interface TransactionService {
 
 	List<Transaction> getAllTransactions();
 
-	CompletableFuture<Boolean> verifyTransaction(String razorpay_payment_id, String razorpay_order_id, String razorpay_signature);
+	CompletableFuture<PaymentVerificationResult> verifyTransaction(String razorpay_payment_id, String razorpay_order_id,
+			String razorpay_signature);
+
+//	ResponseEntity<Void> redirectToPaymentResult(PaymentVerificationResult result);
 }
